@@ -326,23 +326,25 @@ Behavior:
 - Batch operations respect `max_batch_perform` unless `assume_yes` is enabled.
 ```
 
-### Important Usage Notes
+ Important Usage Notes
 
-1. **Data Persistence**: All data is automatically saved. Use `backup` for additional safety.
+1. Data Persistence: All data is automatically saved. Use `backup` for additional safety.
 
-2. **File Paths**: Use forward slashes (/) for paths on all platforms.
+2. File Paths: Use forward slashes (/) for paths on all platforms.
 
-3. **Command History**: Use arrow keys to navigate through command history.
+3. Command History: Use arrow keys to navigate through command history.
 
-4. **Interruption**: Press Ctrl+C to interrupt commands, type `exit` to quit properly.
+4. Interruption: Press Ctrl+C to interrupt commands, type `exit` to quit properly.
 
-5. **Performance**: Large projects may take longer to load. Use `performance` command for optimization.
+5. Performance: Large projects may take longer to load. Use `performance` command for optimization.
 
-6. **Themes**: Switch themes using `theme <name>` command for better visibility.
+6. Themes: Switch themes using `theme <name>` command for better visibility.
 
 ## File Structure
 
 ```
+
+
 AI-Terminal-Workflow/
 ├── 📄 Core Files
 │   ├── terminal_interface.py    # Main terminal interface with UI and command processing
