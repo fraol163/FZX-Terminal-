@@ -340,9 +340,13 @@ Behavior:
 
 6. Themes: Switch themes using `theme <name>` command for better visibility.
 
-## File Structure
 
 ```
+
+
+## File Structure
+
+
 
 
 AI-Terminal-Workflow/
