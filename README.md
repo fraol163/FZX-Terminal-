@@ -343,11 +343,8 @@ Behavior:
 
 ```
 
-
+```
 ## File Structure
-
-
-
 
 AI-Terminal-Workflow/
 ├── 📄 Core Files
