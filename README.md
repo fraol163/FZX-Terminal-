@@ -539,7 +539,7 @@ By contributing to this project, you agree that your contributions will be licen
 
 **Happy coding! 🚀**
 
-** Created By Fraol Teshome**
+**Created By Fraol Teshome**
 
 ---
 
