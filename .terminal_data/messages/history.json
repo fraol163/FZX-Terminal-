@@ -1,0 +1,65 @@
+[
+  {
+    "id": "msg_694f5c19",
+    "content": "Message history cleared",
+    "timestamp": "2025-09-12T12:24:39.409411",
+    "message_type": "info",
+    "project_id": "proj_91de5140",
+    "session_id": "session_3b6e0bab_1757669030",
+    "metadata": {}
+  },
+  {
+    "id": "msg_4553f692",
+    "content": "Command executed: session clear",
+    "timestamp": "2025-09-12T12:24:50.532022",
+    "message_type": "command",
+    "project_id": "proj_91de5140",
+    "session_id": "session_3b6e0bab_1757669030",
+    "metadata": {}
+  },
+  {
+    "id": "msg_62954543",
+    "content": "All sessions cleared",
+    "timestamp": "2025-09-12T12:24:50.540044",
+    "message_type": "info",
+    "project_id": "proj_91de5140",
+    "session_id": "session_3b6e0bab_1757669030",
+    "metadata": {}
+  },
+  {
+    "id": "msg_3bec20a9",
+    "content": "Command executed: task clear",
+    "timestamp": "2025-09-12T12:24:57.880839",
+    "message_type": "command",
+    "project_id": "proj_91de5140",
+    "session_id": "session_3b6e0bab_1757669030",
+    "metadata": {}
+  },
+  {
+    "id": "msg_7c52a0d9",
+    "content": "All tasks cleared",
+    "timestamp": "2025-09-12T12:24:57.896968",
+    "message_type": "info",
+    "project_id": "proj_91de5140",
+    "session_id": "session_3b6e0bab_1757669030",
+    "metadata": {}
+  },
+  {
+    "id": "msg_27c59bbf",
+    "content": "Command executed: clear",
+    "timestamp": "2025-09-12T12:25:33.331647",
+    "message_type": "command",
+    "project_id": "proj_91de5140",
+    "session_id": "session_3b6e0bab_1757669030",
+    "metadata": {}
+  },
+  {
+    "id": "msg_7fab288c",
+    "content": "Command executed: exit",
+    "timestamp": "2025-09-12T19:47:22.723922",
+    "message_type": "command",
+    "project_id": "proj_91de5140",
+    "session_id": "session_3b6e0bab_1757669030",
+    "metadata": {}
+  }
+]
