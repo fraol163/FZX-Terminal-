@@ -485,7 +485,7 @@ We welcome contributions from developers of all skill levels! Here's how you can
 
 ### MIT License
 
-Copyright (c) 2024 AI Terminal Workflow Contributors
+Copyright (c) 2025 AI Terminal Workflow Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
