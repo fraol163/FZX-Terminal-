@@ -16,7 +16,7 @@ def main():
     
     try:
         import terminal_interface
-        interface = terminal_interface.TerminalInterface()
+        interface = terminal_interface.RobustTerminalInterface()
         interface.run()
         return 0
     except KeyboardInterrupt:

@@ -741,318 +741,309 @@ class ProjectDetector:
         
         test_dirs = [d for d in directories if 'test' in d.lower()]
         if len(test_dirs) > 0 and file_structure['file_count'] > 0:
-            test_files = sum(1 for f in file_structure['files'] if 'test' in f.lower())
-            if test_files / file_structure['file_count'] > 0.2:
-                patterns.add('Test-Driven Development')
+            patterns.add('Test-Driven Development')
         
-        doc_files = sum(1 for f in file_structure['files'] if f.lower().endswith(('.md', '.rst', '.txt')))
-        if doc_files > 5:
-            patterns.add('Documentation-Heavy')
+        if 'docs' in directories or 'documentation' in directories:
+            patterns.add('Documentation-Driven Development')
         
-        config_files = sum(1 for f in file_structure['files'] 
-                          if f.lower().endswith(('.yaml', '.yml', '.json', '.toml', '.ini', '.cfg')))
-        if config_files > 10:
-            patterns.add('Configuration as Code')
+        if any(f in file_structure['files'] for f in ['.gitignore', '.gitattributes']):
+            patterns.add('Version Control')
+        
+        if any(f in file_structure['files'] for f in ['README.md', 'README.rst', 'README.txt']):
+            patterns.add('Open Source')
+        
+        ci_files = ['.github', '.gitlab-ci.yml', '.travis.yml', 'jenkins', 'azure-pipelines.yml']
+        if any((project_path / f).exists() for f in ci_files):
+            patterns.add('Continuous Integration')
         
         return sorted(list(patterns))
     
     def _extract_dependencies(self, project_path: Path) -> Dict[str, List[str]]:
-        """Extract project dependencies from various files."""
-        dependencies = {
-            'production': [],
-            'development': [],
-            'optional': [],
-            'system': []
-        }
+        """Extract project dependencies from various package files."""
+        dependencies = {}
         
+        # JavaScript/Node.js dependencies
         package_json = project_path / 'package.json'
         if package_json.exists():
             try:
                 with open(package_json, 'r', encoding='utf-8') as f:
                     package_data = json.load(f)
                     
-                dependencies['production'].extend(list(package_data.get('dependencies', {}).keys()))
-                dependencies['development'].extend(list(package_data.get('devDependencies', {}).keys()))
-                dependencies['optional'].extend(list(package_data.get('optionalDependencies', {}).keys()))
+                dependencies['production'] = list(package_data.get('dependencies', {}).keys())
+                dependencies['development'] = list(package_data.get('devDependencies', {}).keys())
+                dependencies['peer'] = list(package_data.get('peerDependencies', {}).keys())
             
             except (json.JSONDecodeError, OSError):
                 pass
         
+        # Python dependencies
         requirements_txt = project_path / 'requirements.txt'
         if requirements_txt.exists():
             try:
                 with open(requirements_txt, 'r', encoding='utf-8') as f:
+                    requirements = []
                     for line in f:
                         line = line.strip()
                         if line and not line.startswith('#'):
+                            # Extract package name (before version specifiers)
                             package_name = re.split(r'[>=<!=]', line)[0].strip()
-                            if package_name:
-                                dependencies['production'].append(package_name)
+                            requirements.append(package_name)
+                    dependencies['python'] = requirements
             
             except OSError:
                 pass
         
-        for category in dependencies:
-            dependencies[category] = sorted(list(set(dependencies[category])))
+        # Poetry dependencies
+        pyproject_toml = project_path / 'pyproject.toml'
+        if pyproject_toml.exists():
+            try:
+                with open(pyproject_toml, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    # Simple extraction - could be improved with TOML parser
+                    poetry_deps = re.findall(r'^(\w+)\s*=', content, re.MULTILINE)
+                    if poetry_deps:
+                        dependencies['poetry'] = poetry_deps
+            
+            except OSError:
+                pass
+        
+        # Rust dependencies
+        cargo_toml = project_path / 'Cargo.toml'
+        if cargo_toml.exists():
+            try:
+                with open(cargo_toml, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    # Simple extraction - could be improved with TOML parser
+                    cargo_deps = re.findall(r'^(\w+)\s*=', content, re.MULTILINE)
+                    if cargo_deps:
+                        dependencies['cargo'] = cargo_deps
+            
+            except OSError:
+                pass
+        
+        # Go dependencies
+        go_mod = project_path / 'go.mod'
+        if go_mod.exists():
+            try:
+                with open(go_mod, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    go_deps = re.findall(r'require\s+([^\s]+)', content)
+                    if go_deps:
+                        dependencies['go'] = go_deps
+            
+            except OSError:
+                pass
         
         return dependencies
 
-class ProjectContextInference:
-    """Main project context inference system."""
+
+class ProjectInferenceEngine:
+    """Main project inference engine."""
     
-    def __init__(self, project_root: str = None):
-        self.project_root = Path(project_root or os.getcwd())
+    def __init__(self):
         self.detector = ProjectDetector()
-        self.cache_file = self.project_root / ".project_context.json"
-        self.cached_fingerprint: Optional[ProjectFingerprint] = None
+        self.cache = {}
+        self.cache_file = Path('.project_context.json')
         
-        self._load_cached_fingerprint()
+        self._load_cache()
     
-    def infer_project_context(self, force_refresh: bool = False) -> ProjectFingerprint:
-        """Infer project context with intelligent caching."""
+    def analyze_project(self, project_path: str = None, force_refresh: bool = False) -> ProjectFingerprint:
+        """Analyze project and return comprehensive fingerprint."""
+        if project_path is None:
+            project_path = os.getcwd()
         
-        if not force_refresh and self.cached_fingerprint:
-            if not self._has_project_changed():
-                print("📋 Using cached project context")
-                return self.cached_fingerprint
+        project_path = Path(project_path).resolve()
+        cache_key = str(project_path)
         
-        print("🔍 Analyzing project context...")
+        if not force_refresh and cache_key in self.cache:
+            cached_result = self.cache[cache_key]
+            if self._is_cache_valid(cached_result):
+                print("📋 Using cached project analysis")
+                return ProjectFingerprint(**cached_result['fingerprint'])
         
-        fingerprint = self.detector.detect_project_type(str(self.project_root))
+        print(f"🔍 Analyzing project: {project_path.name}")
+        fingerprint = self.detector.detect_project_type(str(project_path))
         
-        self.cached_fingerprint = fingerprint
-        self._save_cached_fingerprint()
+        self.cache[cache_key] = {
+            'fingerprint': asdict(fingerprint),
+            'timestamp': time.time(),
+            'project_path': str(project_path)
+        }
         
-        self._log_detection_results(fingerprint)
+        self._save_cache()
         
         return fingerprint
     
-    def get_project_recommendations(self, fingerprint: ProjectFingerprint = None) -> Dict[str, List[str]]:
-        """Get project-specific recommendations based on fingerprint."""
-        if fingerprint is None:
-            fingerprint = self.infer_project_context()
-        
+    def get_project_recommendations(self, fingerprint: ProjectFingerprint) -> Dict[str, List[str]]:
+        """Get recommendations based on project analysis."""
         recommendations = {
-            'development_tools': [],
+            'setup_suggestions': [],
+            'tool_recommendations': [],
             'best_practices': [],
-            'optimization_suggestions': [],
-            'security_recommendations': [],
-            'testing_suggestions': [],
-            'deployment_options': []
+            'optimization_tips': [],
+            'security_suggestions': []
         }
         
-        project_type = fingerprint.project_type
+        # Setup suggestions based on project type
+        if fingerprint.project_type == ProjectType.PYTHON:
+            if 'venv' not in fingerprint.development_patterns:
+                recommendations['setup_suggestions'].append("Set up virtual environment (python -m venv venv)")
+            if not fingerprint.package_managers:
+                recommendations['setup_suggestions'].append("Consider using pip, pipenv, or poetry for dependency management")
+            if 'pytest' not in fingerprint.testing_frameworks:
+                recommendations['tool_recommendations'].append("Add pytest for testing")
         
-        if project_type == ProjectType.PYTHON:
-            recommendations['development_tools'].extend([
-                'Use virtual environments (venv/conda)',
-                'Consider using Black for code formatting',
-                'Add type hints with mypy',
-                'Use pre-commit hooks for code quality'
-            ])
-        elif project_type == ProjectType.JAVASCRIPT:
-            recommendations['development_tools'].extend([
-                'Use ESLint for code linting',
-                'Consider Prettier for code formatting',
-                'Add TypeScript for better type safety',
-                'Use Husky for git hooks'
-            ])
-        elif project_type == ProjectType.REACT:
-            recommendations['development_tools'].extend([
-                'Use React DevTools for debugging',
-                'Consider Storybook for component development',
-                'Add React Testing Library for testing',
-                'Use React Router for navigation'
-            ])
+        elif fingerprint.project_type == ProjectType.JAVASCRIPT:
+            if 'npm' not in fingerprint.package_managers and 'yarn' not in fingerprint.package_managers:
+                recommendations['setup_suggestions'].append("Initialize package.json (npm init)")
+            if not fingerprint.testing_frameworks:
+                recommendations['tool_recommendations'].append("Add Jest or Mocha for testing")
         
-        if 'testing' not in [fw.lower() for fw in fingerprint.testing_frameworks]:
-            recommendations['best_practices'].append('Add automated testing')
+        elif fingerprint.project_type == ProjectType.REACT:
+            if 'TypeScript' not in fingerprint.languages:
+                recommendations['tool_recommendations'].append("Consider migrating to TypeScript")
+            if 'eslint' not in [tool.lower() for tool in fingerprint.build_tools]:
+                recommendations['tool_recommendations'].append("Add ESLint for code quality")
         
-        if not fingerprint.deployment_targets:
-            recommendations['best_practices'].append('Set up CI/CD pipeline')
+        # General recommendations
+        if 'Version Control' not in fingerprint.development_patterns:
+            recommendations['setup_suggestions'].append("Initialize Git repository (git init)")
         
-        if 'git' not in fingerprint.technologies:
-            recommendations['best_practices'].append('Initialize version control with Git')
-        
-        if project_type in [ProjectType.JAVASCRIPT, ProjectType.NODE, ProjectType.REACT]:
-            recommendations['security_recommendations'].extend([
-                'Run npm audit to check for vulnerabilities',
-                'Use environment variables for sensitive data',
-                'Consider using a security linter like ESLint Security'
-            ])
-        elif project_type == ProjectType.PYTHON:
-            recommendations['security_recommendations'].extend([
-                'Use safety to check for known vulnerabilities',
-                'Store secrets in environment variables',
-                'Consider using bandit for security linting'
-            ])
+        if 'Documentation-Driven Development' not in fingerprint.development_patterns:
+            recommendations['best_practices'].append("Add README.md with project documentation")
         
         if not fingerprint.testing_frameworks:
-            if project_type == ProjectType.PYTHON:
-                recommendations['testing_suggestions'].append('Add pytest for testing')
-            elif project_type in [ProjectType.JAVASCRIPT, ProjectType.REACT]:
-                recommendations['testing_suggestions'].append('Add Jest for unit testing')
+            recommendations['best_practices'].append("Implement automated testing")
         
-        if not fingerprint.deployment_targets:
-            if project_type == ProjectType.REACT:
-                recommendations['deployment_options'].extend([
-                    'Deploy to Vercel or Netlify for static hosting',
-                    'Use GitHub Pages for simple deployments'
-                ])
-            elif project_type in [ProjectType.PYTHON, ProjectType.DJANGO, ProjectType.FLASK]:
-                recommendations['deployment_options'].extend([
-                    'Deploy to Heroku for quick setup',
-                    'Use Docker for containerized deployment',
-                    'Consider AWS/GCP/Azure for production'
-                ])
+        if 'Continuous Integration' not in fingerprint.development_patterns:
+            recommendations['optimization_tips'].append("Set up CI/CD pipeline")
+        
+        # Security suggestions
+        if fingerprint.project_type in [ProjectType.JAVASCRIPT, ProjectType.TYPESCRIPT, ProjectType.REACT]:
+            recommendations['security_suggestions'].append("Run npm audit to check for vulnerabilities")
+        
+        if fingerprint.project_type == ProjectType.PYTHON:
+            recommendations['security_suggestions'].append("Use safety to check for known security vulnerabilities")
+        
+        if 'Docker' not in fingerprint.technologies:
+            recommendations['optimization_tips'].append("Consider containerizing with Docker")
         
         return recommendations
     
-    def generate_project_summary(self, fingerprint: ProjectFingerprint = None) -> str:
+    def generate_project_summary(self, fingerprint: ProjectFingerprint) -> str:
         """Generate a human-readable project summary."""
-        if fingerprint is None:
-            fingerprint = self.infer_project_context()
-        
         summary_parts = []
         
+        # Project type and confidence
         confidence_desc = "high" if fingerprint.confidence > 0.7 else "medium" if fingerprint.confidence > 0.4 else "low"
-        summary_parts.append(
-            f"This appears to be a {fingerprint.project_type.value} project "
-            f"(confidence: {confidence_desc} - {fingerprint.confidence:.1%})"
-        )
+        summary_parts.append(f"Detected as {fingerprint.project_type.value} project with {confidence_desc} confidence ({fingerprint.confidence:.1%})")
         
-        if fingerprint.technologies:
-            tech_list = ", ".join(fingerprint.technologies[:5])
-            if len(fingerprint.technologies) > 5:
-                tech_list += f" and {len(fingerprint.technologies) - 5} more"
-            summary_parts.append(f"Technologies: {tech_list}")
-        
-        if fingerprint.frameworks:
-            framework_list = ", ".join(fingerprint.frameworks[:3])
-            if len(fingerprint.frameworks) > 3:
-                framework_list += f" and {len(fingerprint.frameworks) - 3} more"
-            summary_parts.append(f"Frameworks: {framework_list}")
-        
+        # Languages
         if fingerprint.languages:
-            lang_list = ", ".join(fingerprint.languages)
-            summary_parts.append(f"Languages: {lang_list}")
+            lang_str = ", ".join(fingerprint.languages[:3])
+            if len(fingerprint.languages) > 3:
+                lang_str += f" and {len(fingerprint.languages) - 3} more"
+            summary_parts.append(f"Primary languages: {lang_str}")
         
+        # Frameworks
+        if fingerprint.frameworks:
+            framework_str = ", ".join(fingerprint.frameworks[:3])
+            if len(fingerprint.frameworks) > 3:
+                framework_str += f" and {len(fingerprint.frameworks) - 3} more"
+            summary_parts.append(f"Frameworks: {framework_str}")
+        
+        # Build tools and package managers
+        tools = fingerprint.build_tools + fingerprint.package_managers
+        if tools:
+            tools_str = ", ".join(tools[:3])
+            if len(tools) > 3:
+                tools_str += f" and {len(tools) - 3} more"
+            summary_parts.append(f"Tools: {tools_str}")
+        
+        # Development patterns
         if fingerprint.development_patterns:
-            pattern_list = ", ".join(fingerprint.development_patterns[:2])
-            summary_parts.append(f"Patterns: {pattern_list}")
-        
-        structure = fingerprint.project_structure
-        summary_parts.append(
-            f"Structure: {structure['file_count']} files, "
-            f"{structure['directory_count']} directories"
-        )
+            patterns_str = ", ".join(fingerprint.development_patterns[:2])
+            if len(fingerprint.development_patterns) > 2:
+                patterns_str += f" and {len(fingerprint.development_patterns) - 2} more"
+            summary_parts.append(f"Patterns: {patterns_str}")
         
         return ". ".join(summary_parts) + "."
     
-    def _has_project_changed(self) -> bool:
-        """Check if project structure has changed since last analysis."""
-        if not self.cached_fingerprint:
-            return True
-        
+    def _is_cache_valid(self, cached_data: Dict[str, Any], max_age_hours: int = 24) -> bool:
+        """Check if cached data is still valid."""
+        cache_age = time.time() - cached_data.get('timestamp', 0)
+        return cache_age < (max_age_hours * 3600)
+    
+    def _load_cache(self) -> None:
+        """Load cache from disk."""
         try:
-            current_structure = self.detector._scan_project_structure(self.project_root)
-            cached_structure = self.cached_fingerprint.project_structure
-            
-            file_count_diff = abs(current_structure['file_count'] - cached_structure['file_count'])
-            if file_count_diff > max(5, cached_structure['file_count'] * 0.1):
-                return True
-            
-            important_files = {
-                'package.json', 'requirements.txt', 'Dockerfile', 'docker-compose.yml',
-                'pyproject.toml', 'Cargo.toml', 'go.mod', 'pom.xml'
-            }
-            
-            current_important = current_structure['files'].intersection(important_files)
-            cached_important = cached_structure['files'].intersection(important_files)
-            
-            if current_important != cached_important:
-                return True
-            
-            return False
-            
-        except Exception:
-            return True
-    
-    def _load_cached_fingerprint(self) -> None:
-        """Load cached fingerprint from disk."""
-        if self.cache_file.exists():
-            try:
+            if self.cache_file.exists():
                 with open(self.cache_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    
-                data['project_type'] = ProjectType(data['project_type'])
-                
-                self.cached_fingerprint = ProjectFingerprint(**data)
-                
-            except (json.JSONDecodeError, OSError, ValueError, TypeError):
-                self.cached_fingerprint = None
+                    self.cache = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            self.cache = {}
     
-    def _save_cached_fingerprint(self) -> None:
-        """Save fingerprint to cache."""
-        if self.cached_fingerprint:
-            try:
-                data = asdict(self.cached_fingerprint)
-                data['project_type'] = self.cached_fingerprint.project_type.value
-                
-                with open(self.cache_file, 'w', encoding='utf-8') as f:
-                    json.dump(data, f, indent=2, ensure_ascii=False)
-                    
-            except (OSError, TypeError):
-                pass
-    
-    def _log_detection_results(self, fingerprint: ProjectFingerprint) -> None:
-        """Log project detection results."""
-        print(f"\n🎯 Project Detection Results:")
-        print(f"  Type: {fingerprint.project_type.value} (confidence: {fingerprint.confidence:.1%})")
-        
-        if fingerprint.languages:
-            print(f"  Languages: {', '.join(fingerprint.languages)}")
-        
-        if fingerprint.frameworks:
-            print(f"  Frameworks: {', '.join(fingerprint.frameworks[:3])}")
-        
-        if fingerprint.technologies:
-            print(f"  Technologies: {', '.join(fingerprint.technologies[:5])}")
-        
-        if fingerprint.development_patterns:
-            print(f"  Patterns: {', '.join(fingerprint.development_patterns[:2])}")
-        
-        print(f"  Structure: {fingerprint.project_structure['file_count']} files, "
-              f"{fingerprint.project_structure['directory_count']} directories")
-        
-        if fingerprint.evidence:
-            print(f"  Evidence: {', '.join(fingerprint.evidence[:3])}")
+    def _save_cache(self) -> None:
+        """Save cache to disk."""
+        try:
+            with open(self.cache_file, 'w', encoding='utf-8') as f:
+                json.dump(self.cache, f, indent=2, ensure_ascii=False)
+        except OSError as e:
+            print(f"Warning: Could not save project cache: {e}")
 
-_project_inference_instance = None
 
-def get_project_inference() -> ProjectContextInference:
-    """Get the global project inference instance."""
-    global _project_inference_instance
-    if _project_inference_instance is None:
-        _project_inference_instance = ProjectContextInference()
-    return _project_inference_instance
+# Global inference engine instance
+_inference_engine_instance = None
+
+
+def get_project_inference_engine() -> ProjectInferenceEngine:
+    """Get or create the global project inference engine instance."""
+    global _inference_engine_instance
+    if _inference_engine_instance is None:
+        _inference_engine_instance = ProjectInferenceEngine()
+    return _inference_engine_instance
+
+
+def analyze_current_project(force_refresh: bool = False) -> ProjectFingerprint:
+    """Analyze the current project directory."""
+    engine = get_project_inference_engine()
+    return engine.analyze_project(force_refresh=force_refresh)
+
+
+def get_project_recommendations_for_current() -> Dict[str, List[str]]:
+    """Get recommendations for the current project."""
+    engine = get_project_inference_engine()
+    fingerprint = engine.analyze_project()
+    return engine.get_project_recommendations(fingerprint)
+
 
 if __name__ == "__main__":
-    inference = get_project_inference()
+    print("🔍 Testing Project Inference Engine...")
     
-    print("🧠 Testing Project Context Inference...")
+    engine = get_project_inference_engine()
+    fingerprint = engine.analyze_project()
     
-    fingerprint = inference.infer_project_context()
+    print(f"\n📊 Project Analysis Results:")
+    print(f"  Type: {fingerprint.project_type.value}")
+    print(f"  Confidence: {fingerprint.confidence:.1%}")
+    print(f"  Languages: {', '.join(fingerprint.languages) if fingerprint.languages else 'None detected'}")
+    print(f"  Frameworks: {', '.join(fingerprint.frameworks) if fingerprint.frameworks else 'None detected'}")
+    print(f"  Technologies: {', '.join(fingerprint.technologies) if fingerprint.technologies else 'None detected'}")
     
-    summary = inference.generate_project_summary(fingerprint)
-    print(f"\n📋 Project Summary:\n{summary}")
+    if fingerprint.evidence:
+        print(f"\n🔍 Evidence:")
+        for evidence in fingerprint.evidence[:5]:
+            print(f"    • {evidence}")
     
-    recommendations = inference.get_project_recommendations(fingerprint)
+    summary = engine.generate_project_summary(fingerprint)
+    print(f"\n📋 Summary: {summary}")
+    
+    recommendations = engine.get_project_recommendations(fingerprint)
     print(f"\n💡 Recommendations:")
-    for category, items in recommendations.items():
-        if items:
+    for category, suggestions in recommendations.items():
+        if suggestions:
             print(f"  {category.replace('_', ' ').title()}:")
-            for item in items[:2]:
-                print(f"    • {item}")
+            for suggestion in suggestions[:3]:
+                print(f"    • {suggestion}")
     
-    print("\n✅ Project Context Inference test completed")
+    print("\n✅ Project Inference Engine test completed!")

@@ -708,11 +708,19 @@ if __name__ == "__main__":
         print(f"  Commands executed: {analysis['command_count']}")
         print(f"  Successful: {analysis['session_summary']['successful_commands']}")
         print(f"  Failed: {analysis['session_summary']['failed_commands']}")
+        
+        if analysis['correlation_analysis']['detected_workflows']:
+            print(f"  Detected workflows: {len(analysis['correlation_analysis']['detected_workflows'])}")
+        
+        if analysis['correlation_analysis']['optimization_suggestions']:
+            print(f"  Optimization suggestions: {len(analysis['correlation_analysis']['optimization_suggestions'])}")
     
     summary = engine.get_persistence_summary()
     print(f"\n📈 Persistence Summary:")
     print(f"  Active sessions: {summary['active_sessions']}")
     print(f"  Total commands: {summary['total_commands']}")
     print(f"  Success rate: {summary['successful_commands']}/{summary['total_commands']}")
+    
+    print("\n✅ Terminal Persistence Engine test completed!")
     
     print("\n✅ Terminal Persistence Engine test completed")

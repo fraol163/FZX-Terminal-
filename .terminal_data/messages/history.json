@@ -1,65 +1,38 @@
 [
   {
-    "id": "msg_694f5c19",
+    "id": "msg_ee91ae24",
     "content": "Message history cleared",
-    "timestamp": "2025-09-12T12:24:39.409411",
+    "timestamp": "2025-09-13T16:22:44.173726",
     "message_type": "info",
-    "project_id": "proj_91de5140",
-    "session_id": "session_3b6e0bab_1757669030",
+    "project_id": "proj_b1eb2668",
+    "session_id": "session_80ebc328_1757769676",
     "metadata": {}
   },
   {
-    "id": "msg_4553f692",
+    "id": "msg_b95f6020",
     "content": "Command executed: session clear",
-    "timestamp": "2025-09-12T12:24:50.532022",
+    "timestamp": "2025-09-13T16:22:50.354716",
     "message_type": "command",
-    "project_id": "proj_91de5140",
-    "session_id": "session_3b6e0bab_1757669030",
+    "project_id": "proj_b1eb2668",
+    "session_id": "session_80ebc328_1757769676",
     "metadata": {}
   },
   {
-    "id": "msg_62954543",
+    "id": "msg_c375007d",
     "content": "All sessions cleared",
-    "timestamp": "2025-09-12T12:24:50.540044",
+    "timestamp": "2025-09-13T16:22:50.366942",
     "message_type": "info",
-    "project_id": "proj_91de5140",
-    "session_id": "session_3b6e0bab_1757669030",
+    "project_id": "proj_b1eb2668",
+    "session_id": "session_80ebc328_1757769676",
     "metadata": {}
   },
   {
-    "id": "msg_3bec20a9",
-    "content": "Command executed: task clear",
-    "timestamp": "2025-09-12T12:24:57.880839",
-    "message_type": "command",
-    "project_id": "proj_91de5140",
-    "session_id": "session_3b6e0bab_1757669030",
-    "metadata": {}
-  },
-  {
-    "id": "msg_7c52a0d9",
-    "content": "All tasks cleared",
-    "timestamp": "2025-09-12T12:24:57.896968",
-    "message_type": "info",
-    "project_id": "proj_91de5140",
-    "session_id": "session_3b6e0bab_1757669030",
-    "metadata": {}
-  },
-  {
-    "id": "msg_27c59bbf",
-    "content": "Command executed: clear",
-    "timestamp": "2025-09-12T12:25:33.331647",
-    "message_type": "command",
-    "project_id": "proj_91de5140",
-    "session_id": "session_3b6e0bab_1757669030",
-    "metadata": {}
-  },
-  {
-    "id": "msg_7fab288c",
+    "id": "msg_a1d33f74",
     "content": "Command executed: exit",
-    "timestamp": "2025-09-12T19:47:22.723922",
+    "timestamp": "2025-09-13T16:22:58.333248",
     "message_type": "command",
-    "project_id": "proj_91de5140",
-    "session_id": "session_3b6e0bab_1757669030",
+    "project_id": "proj_b1eb2668",
+    "session_id": "session_80ebc328_1757769676",
     "metadata": {}
   }
 ]

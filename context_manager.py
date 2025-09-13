@@ -736,18 +736,69 @@ class ContextManager:
             # Side effects for durable memory: export and daily snapshot
             try:
                 self.export_universal_memory()
-            except Exception:
-                pass
-            try:
                 self.snapshot_long_term_memory()
             except Exception:
                 pass
-
+                
             return True
             
         except Exception as e:
             print(f"⚠ Failed to save persistent context: {e}")
             return False
+
+
+# Global context manager instance
+_context_manager_instance: Optional[ContextManager] = None
+
+
+def get_context_manager() -> ContextManager:
+    """Get or create the global context manager instance."""
+    global _context_manager_instance
+    if _context_manager_instance is None:
+        _context_manager_instance = ContextManager()
+    return _context_manager_instance
+
+
+def reset_context_manager() -> None:
+    """Reset the global context manager instance."""
+    global _context_manager_instance
+    _context_manager_instance = None
+
+
+if __name__ == "__main__":
+    # Test the context manager
+    cm = get_context_manager()
+    
+    # Add some test context
+    context_id = cm.add_context(
+        content="This is a test context item for development.",
+        context_type="test",
+        priority=ContextPriority.HIGH,
+        layer=MemoryLayer.SESSION,
+        tags=["test", "development"]
+    )
+    
+    print(f"Added context with ID: {context_id}")
+    
+    # Test search
+    results = cm.search_context("test development")
+    print(f"Search results: {len(results)} items found")
+    
+    # Test prompt building
+    prompt_data = cm.build_prompt(max_tokens=1000, system_header="You are a helpful assistant.")
+    print(f"Built prompt with {prompt_data['token_count']} tokens")
+    
+    # Test memory export
+    export_path = cm.export_universal_memory()
+    print(f"Exported memory to: {export_path}")
+    
+    # Test context summary
+    summary = cm.get_context_summary()
+    print(f"Context summary: {summary['total_items']} items, {summary['memory_usage_mb']:.2f} MB")
+    
+    # Save persistent context
+    saved = cm.save_persistent_context()
+    print(f"Context saved: {saved}")
 
 _context_manager_instance = None
 
