@@ -1,38 +1,3 @@
 [
-  {
-    "id": "msg_ee91ae24",
-    "content": "Message history cleared",
-    "timestamp": "2025-09-13T16:22:44.173726",
-    "message_type": "info",
-    "project_id": "proj_b1eb2668",
-    "session_id": "session_80ebc328_1757769676",
-    "metadata": {}
-  },
-  {
-    "id": "msg_b95f6020",
-    "content": "Command executed: session clear",
-    "timestamp": "2025-09-13T16:22:50.354716",
-    "message_type": "command",
-    "project_id": "proj_b1eb2668",
-    "session_id": "session_80ebc328_1757769676",
-    "metadata": {}
-  },
-  {
-    "id": "msg_c375007d",
-    "content": "All sessions cleared",
-    "timestamp": "2025-09-13T16:22:50.366942",
-    "message_type": "info",
-    "project_id": "proj_b1eb2668",
-    "session_id": "session_80ebc328_1757769676",
-    "metadata": {}
-  },
-  {
-    "id": "msg_a1d33f74",
-    "content": "Command executed: exit",
-    "timestamp": "2025-09-13T16:22:58.333248",
-    "message_type": "command",
-    "project_id": "proj_b1eb2668",
-    "session_id": "session_80ebc328_1757769676",
-    "metadata": {}
-  }
+  
 ]

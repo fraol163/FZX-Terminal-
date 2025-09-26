@@ -23,10 +23,12 @@ try:
     from context_manager import ContextManager, get_context_manager
     from chat_manager import get_chat_manager
     from project_inference import ProjectInferenceEngine
+    from ai_service import get_ai_manager
 except ImportError as e:
     print(f"Warning: Could not import workflow components: {e}")
     print("Some features may be limited.")
     ProjectInferenceEngine = None
+    get_ai_manager = None
 
 class Colors:
     RESET = '\033[0m'
@@ -213,6 +215,15 @@ class RobustTerminalInterface:
         
         # Minimal command registry (hook for future full refactor)
         self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
         self._register_commands()
         
         self.initialize_system()
@@ -405,7 +416,7 @@ class RobustTerminalInterface:
         nav_categories = [
             ("🚀", "PROJECTS", "project list | create | switch | info", accent_gold),
             ("✅", "TASKS", "task list | create | update | priority", neon_cyan),
-            ("💬", "MESSAGES", "message send | history | export", gradient_bot),
+            ("🤖", "AI ASSISTANT", "ai config setup | ai chat | ai help", gradient_bot),
             ("⚙️", "SETTINGS", "config | theme | backup | performance", accent_silver),
             ("📚", "HELP", "help | status | clear", green)
         ]
@@ -511,7 +522,7 @@ class RobustTerminalInterface:
         
         print(f"{gradient_bot}║{Colors.RESET} {' '*98}")
         
-        features_line = f" 🎯 {accent_gold}Project{Colors.RESET} {Colors.DIM}• ✅ Task Tracking • 💬 AI Communication • 💾 Session Persistence{Colors.RESET}"
+        features_line = f" 🎯 {accent_gold}Project{Colors.RESET} {Colors.DIM}• ✅ Task Tracking • 🤖 AI Assistant • 💾 Session Persistence{Colors.RESET}"
         print(f"{gradient_bot}║{Colors.RESET}{features_line}")
         
         print(f"{gradient_bot}║{Colors.RESET} {' '*98}")
@@ -540,7 +551,8 @@ class RobustTerminalInterface:
         quick_commands = [
             ("🚀", "project create <name>", "Initialize a new project workspace with intelligent setup"),
             ("✅", "task create <title>", "Add development tasks with priority tracking and progress monitoring"),
-            ("💬", "message send <text>", "Communicate with AI assistants for code help and guidance"),
+            ("🤖", "ai config setup", "Set up AI assistant with latest Gemini models and validation"),
+            ("💬", "ai chat <message>", "Chat with AI using your project context for development help"),
             ("📚", "help", "View complete command reference, documentation, and advanced features")
         ]
         
@@ -680,6 +692,17 @@ class RobustTerminalInterface:
                 ("project settings", "Show project settings", "⚙️"),
                 ("project export [format]", "Export projects (json/xml/txt/csv)", "📤"),
                 ("project clear exports", "Clear all exported files", "🧹")
+            ],
+            "🤖 AI Integration": [
+                ("ai config setup", "Interactive setup with latest models and real-time validation", "🔧"),
+                ("ai config show", "Show current AI configuration with masked key", "👁️"),
+                ("ai config test", "Test AI connection with current configuration", "🧪"),
+                ("ai config add-key", "Add or replace API key with validation", "🔑"),
+                ("ai config edit-key", "Edit current API key with validation", "✏️"),
+                ("ai config delete-key", "Remove API key and configuration completely", "🗑️"),
+                ("ai chat <message>", "Chat with AI using project context and session history", "💬"),
+                ("ai status", "Show detailed AI service and integration status", "📊"),
+                ("ai help", "Show comprehensive AI commands help", "❓")
             ],
             "🧠 Chat & Memory": [
                 ("chat add <user|assistant|system> <text>", "Append a chat message to durable log", "➕"),
@@ -2390,6 +2413,9 @@ class RobustTerminalInterface:
                 cmd_to_run = ' '.join(args)
                 self.handle_run_command(cmd_to_run)
                 
+            elif command == 'ai':
+                self.handle_ai_command(args)
+                
             elif command == 'status':
                 self.handle_status_command()
                 
@@ -2527,7 +2553,7 @@ class RobustTerminalInterface:
                     print(f"{gradient_bot}║{Colors.RESET}{cmd_desc_content}")
                     print(f"{gradient_bot}║{Colors.RESET} {' '*98}")
                     
-                    core_commands = f" 🎯 {accent_silver}Core:{Colors.RESET} {Colors.DIM}project, task, message, help, clear, status{Colors.RESET}"
+                    core_commands = f" 🎯 {accent_silver}Core:{Colors.RESET} {Colors.DIM}project, task, ai config, ai chat, help, status{Colors.RESET}"
                     print(f"{gradient_bot}║{Colors.RESET}{core_commands}")
                     
                     file_ops = f" 📁 {accent_silver}File ops:{Colors.RESET} {Colors.DIM}@path/to/file for direct file operations{Colors.RESET}"
@@ -2621,6 +2647,7 @@ class RobustTerminalInterface:
                 'perform': lambda args: self._route_perform(args),
                 'memory': self.handle_memory_command,
                 'clear': lambda args: (os.system('cls' if os.name == 'nt' else 'clear'), self.display_header()),
+                'ai': self.handle_ai_command,
             }
         except Exception:
             # Non-fatal; fallback to legacy routing
@@ -2685,6 +2712,484 @@ class RobustTerminalInterface:
                     print(f"{Colors.YELLOW}Index out of range. Use 1..{len(history)}{Colors.RESET}")
                 return
         self.handle_perform_command()
+
+    def handle_ai_command(self, args: List[str]) -> None:
+        """Handle AI-related commands for Gemini integration."""
+        if not args:
+            print(f"{Colors.RED}Usage: ai <config|chat|status|help> [options]{Colors.RESET}")
+            return
+        
+        subcommand = args[0].lower()
+        
+        if subcommand == 'config':
+            self._handle_ai_config(args[1:])
+        elif subcommand == 'chat':
+            self._handle_ai_chat(args[1:])
+        elif subcommand == 'status':
+            self._handle_ai_status()
+        elif subcommand == 'help':
+            self._handle_ai_help()
+        else:
+            print(f"{Colors.RED}Unknown AI subcommand: {subcommand}{Colors.RESET}")
+            print(f"Available: config, chat, status, help")
+    
+    def _handle_ai_config(self, args: List[str]) -> None:
+        """Handle AI configuration commands."""
+        if not self.ai_manager:
+            print(f"{Colors.RED}AI service not available{Colors.RESET}")
+            return
+        
+        if not args:
+            print(f"{Colors.RED}Usage: ai config <setup|show|test|add-key|edit-key|delete-key|change-key>{Colors.RESET}")
+            return
+        
+        action = args[0].lower()
+        
+        if action == 'setup':
+            print(f"\n{Colors.CYAN}🤖 Gemini AI Configuration Setup{Colors.RESET}")
+            print(f"{Colors.DIM}Setting up Google Gemini API integration...{Colors.RESET}\n")
+            
+            # Check if already configured
+            if self.ai_manager.is_configured():
+                current_key = self.ai_manager.config.api_key
+                masked_key = current_key[:8] + "*" * (len(current_key) - 12) + current_key[-4:] if len(current_key) > 12 else "*" * len(current_key)
+                print(f"{Colors.YELLOW}Existing configuration detected:{Colors.RESET}")
+                print(f"  API Key: {masked_key}")
+                print(f"  Model: {self.ai_manager.config.model.value}")
+                print(f"\nChoose an option:")
+                print(f"  1. Replace existing configuration")
+                print(f"  2. Edit API key only")
+                print(f"  3. Cancel")
+                
+                choice = input(f"\n{Colors.YELLOW}Enter choice (1-3): {Colors.RESET}").strip()
+                if choice == '2':
+                    self._handle_edit_api_key()
+                    return
+                elif choice == '3':
+                    print(f"{Colors.CYAN}Setup cancelled.{Colors.RESET}")
+                    return
+                elif choice != '1':
+                    print(f"{Colors.RED}Invalid choice. Setup cancelled.{Colors.RESET}")
+                    return
+                print()  # Add spacing
+            
+            # Get API key
+            api_key = input(f"{Colors.YELLOW}Enter your Gemini API key: {Colors.RESET}").strip()
+            if not api_key:
+                print(f"{Colors.RED}API key is required{Colors.RESET}")
+                return
+            
+            # Get model preference
+            print(f"\n{Colors.CYAN}Available models (latest versions only):{Colors.RESET}")
+            models = [
+                ('gemini-2.0-flash-exp', 'Gemini 2.0 Flash (Latest Experimental)'),
+                ('gemini-1.5-pro-latest', 'Gemini 1.5 Pro (Latest)'),
+                ('gemini-1.5-flash-latest', 'Gemini 1.5 Flash (Latest)'),
+                ('gemini-1.5-flash-8b', 'Gemini 1.5 Flash 8B (Fastest)')
+            ]
+            
+            for i, (model_id, description) in enumerate(models, 1):
+                print(f"  {i}. {description}")
+            
+            model_choice = input(f"\n{Colors.YELLOW}Choose model (1-4) [default: 1]: {Colors.RESET}").strip()
+            try:
+                model_idx = int(model_choice) - 1 if model_choice else 0
+                selected_model = models[model_idx][0] if 0 <= model_idx < len(models) else models[0][0]
+            except (ValueError, IndexError):
+                selected_model = models[0][0]
+            
+            # Get additional settings
+            max_tokens = input(f"{Colors.YELLOW}Max tokens [default: 4000]: {Colors.RESET}").strip()
+            try:
+                max_tokens = int(max_tokens) if max_tokens else 4000
+            except ValueError:
+                max_tokens = 4000
+            
+            temperature = input(f"{Colors.YELLOW}Temperature (0.0-1.0) [default: 0.7]: {Colors.RESET}").strip()
+            try:
+                temperature = float(temperature) if temperature else 0.7
+            except ValueError:
+                temperature = 0.7
+            
+            # Validate API key before configuration
+            print(f"\n{Colors.CYAN}Validating API key...{Colors.RESET}")
+            
+            import asyncio
+            async def validate_key():
+                is_valid, message = await self.ai_manager.validate_api_key(api_key, selected_model)
+                return is_valid, message
+            
+            try:
+                is_valid, validation_message = asyncio.run(validate_key())
+                if not is_valid:
+                    print(f"{Colors.RED}❌ {validation_message}{Colors.RESET}")
+                    print(f"{Colors.YELLOW}Please check your API key and try again.{Colors.RESET}")
+                    return
+                else:
+                    print(f"{Colors.GREEN}✅ {validation_message}{Colors.RESET}")
+            except Exception as e:
+                print(f"{Colors.YELLOW}⚠ Could not validate API key: {e}{Colors.RESET}")
+                confirm = input(f"{Colors.YELLOW}Continue anyway? (y/N): {Colors.RESET}").strip().lower()
+                if confirm not in ['y', 'yes']:
+                    print(f"{Colors.CYAN}Setup cancelled.{Colors.RESET}")
+                    return
+            
+            # Configure the AI service
+            if self.ai_manager.configure(api_key, selected_model, max_tokens, temperature):
+                print(f"\n{Colors.GREEN}✅ AI service configured successfully!{Colors.RESET}")
+                self._show_api_key_status()
+                print(f"\n{Colors.CYAN}You can now use 'ai chat <message>' to interact with AI{Colors.RESET}")
+                print(f"{Colors.DIM}Tip: Use 'ai config test' to verify your configuration{Colors.RESET}")
+            else:
+                print(f"\n{Colors.RED}❌ Failed to configure AI service{Colors.RESET}")
+        
+        elif action == 'show':
+            if self.ai_manager.is_configured():
+                config = self.ai_manager.config
+                print(f"\n{Colors.CYAN}🤖 AI Configuration{Colors.RESET}")
+                print(f"  Provider: {config.provider.value}")
+                print(f"  Model: {config.model.value}")
+                print(f"  Max tokens: {config.max_tokens}")
+                print(f"  Temperature: {config.temperature}")
+                print(f"  Context window: {config.context_window}")
+                print(f"  Context integration: {'Enabled' if config.enable_context_integration else 'Disabled'}")
+                print(f"  Streaming: {'Enabled' if config.enable_streaming else 'Disabled'}")
+            else:
+                print(f"{Colors.YELLOW}AI service not configured. Use 'ai config setup' to configure.{Colors.RESET}")
+        
+        elif action == 'test':
+            if not self.ai_manager.is_configured():
+                print(f"{Colors.RED}AI service not configured. Use 'ai config setup' first.{Colors.RESET}")
+                return
+            
+            print(f"{Colors.CYAN}Testing AI connection...{Colors.RESET}")
+            
+            import asyncio
+            async def test_ai():
+                try:
+                    response = await self.ai_manager.chat("Hello! Please respond with a brief greeting.", use_context=False)
+                    if response.success:
+                        print(f"{Colors.GREEN}✅ AI test successful!{Colors.RESET}")
+                        print(f"Response: {response.content[:200]}{'...' if len(response.content) > 200 else ''}")
+                        print(f"Model: {response.model}")
+                        print(f"Response time: {response.response_time:.2f}s")
+                    else:
+                        print(f"{Colors.RED}❌ AI test failed: {response.error}{Colors.RESET}")
+                except Exception as e:
+                    print(f"{Colors.RED}❌ AI test error: {e}{Colors.RESET}")
+            
+            asyncio.run(test_ai())
+        
+        elif action == 'add-key':
+            self._handle_add_api_key()
+        elif action == 'edit-key':
+            self._handle_edit_api_key()
+        elif action == 'delete-key':
+            self._handle_delete_api_key()
+        elif action == 'change-key':
+            self._handle_change_api_key()
+        
+        else:
+            print(f"{Colors.RED}Unknown config action: {action}{Colors.RESET}")
+            print(f"Available: setup, show, test, add-key, edit-key, delete-key, change-key")
+    
+    def _handle_add_api_key(self) -> None:
+        """Handle adding a new API key."""
+        print(f"\n{Colors.CYAN}🔑 Add Gemini API Key{Colors.RESET}")
+        
+        # Check if already configured
+        if self.ai_manager.is_configured():
+            current_key = self.ai_manager.config.api_key
+            masked_key = current_key[:8] + "*" * (len(current_key) - 12) + current_key[-4:] if len(current_key) > 12 else "*" * len(current_key)
+            print(f"\n{Colors.YELLOW}Current API key: {masked_key}{Colors.RESET}")
+            
+            replace = input(f"{Colors.YELLOW}Replace existing key? (y/N): {Colors.RESET}").strip().lower()
+            if replace not in ['y', 'yes']:
+                print(f"{Colors.CYAN}Operation cancelled.{Colors.RESET}")
+                return
+        
+        # Get new API key
+        api_key = input(f"\n{Colors.YELLOW}Enter your Gemini API key: {Colors.RESET}").strip()
+        if not api_key:
+            print(f"{Colors.RED}API key cannot be empty{Colors.RESET}")
+            return
+        
+        # Validate the API key
+        print(f"\n{Colors.CYAN}Validating API key...{Colors.RESET}")
+        
+        import asyncio
+        async def validate_new_key():
+            model_to_test = "gemini-1.5-flash-latest" if not self.ai_manager.is_configured() else self.ai_manager.config.model.value
+            is_valid, message = await self.ai_manager.validate_api_key(api_key, model_to_test)
+            return is_valid, message
+        
+        try:
+            is_valid, validation_message = asyncio.run(validate_new_key())
+            if not is_valid:
+                print(f"{Colors.RED}❌ {validation_message}{Colors.RESET}")
+                confirm = input(f"{Colors.YELLOW}Save invalid key anyway? (y/N): {Colors.RESET}").strip().lower()
+                if confirm not in ['y', 'yes']:
+                    print(f"{Colors.CYAN}Operation cancelled.{Colors.RESET}")
+                    return
+            else:
+                print(f"{Colors.GREEN}✅ {validation_message}{Colors.RESET}")
+        except Exception as e:
+            print(f"{Colors.YELLOW}⚠ Could not validate API key: {e}{Colors.RESET}")
+            confirm = input(f"{Colors.YELLOW}Continue anyway? (y/N): {Colors.RESET}").strip().lower()
+            if confirm not in ['y', 'yes']:
+                print(f"{Colors.CYAN}Operation cancelled.{Colors.RESET}")
+                return
+        
+        # Use existing config or create new one
+        if self.ai_manager.is_configured():
+            config = self.ai_manager.config
+            success = self.ai_manager.configure(
+                api_key=api_key,
+                model=config.model.value,
+                max_tokens=config.max_tokens,
+                temperature=config.temperature
+            )
+        else:
+            # Create new config with latest defaults
+            success = self.ai_manager.configure(
+                api_key=api_key,
+                model="gemini-1.5-flash-latest",
+                max_tokens=4000,
+                temperature=0.7
+            )
+        
+        if success:
+            print(f"\n{Colors.GREEN}✅ API key added successfully!{Colors.RESET}")
+            self._show_api_key_status()
+        else:
+            print(f"\n{Colors.RED}❌ Failed to add API key{Colors.RESET}")
+    
+    def _handle_edit_api_key(self) -> None:
+        """Handle editing the current API key."""
+        if not self.ai_manager.is_configured():
+            print(f"{Colors.RED}No API key configured. Use 'ai config add-key' first.{Colors.RESET}")
+            return
+        
+        print(f"\n{Colors.CYAN}🔎 Edit API Key{Colors.RESET}")
+        
+        current_key = self.ai_manager.config.api_key
+        masked_key = current_key[:8] + "*" * (len(current_key) - 12) + current_key[-4:] if len(current_key) > 12 else "*" * len(current_key)
+        print(f"Current key: {masked_key}")
+        
+        new_key = input(f"\n{Colors.YELLOW}Enter new API key (or press Enter to cancel): {Colors.RESET}").strip()
+        if not new_key:
+            print(f"{Colors.CYAN}Edit cancelled.{Colors.RESET}")
+            return
+        
+        # Validate the new API key
+        print(f"\n{Colors.CYAN}Validating new API key...{Colors.RESET}")
+        
+        import asyncio
+        async def validate_edit_key():
+            is_valid, message = await self.ai_manager.validate_api_key(new_key, self.ai_manager.config.model.value)
+            return is_valid, message
+        
+        try:
+            is_valid, validation_message = asyncio.run(validate_edit_key())
+            if not is_valid:
+                print(f"{Colors.RED}❌ {validation_message}{Colors.RESET}")
+                confirm = input(f"{Colors.YELLOW}Save invalid key anyway? (y/N): {Colors.RESET}").strip().lower()
+                if confirm not in ['y', 'yes']:
+                    print(f"{Colors.CYAN}Edit cancelled.{Colors.RESET}")
+                    return
+            else:
+                print(f"{Colors.GREEN}✅ {validation_message}{Colors.RESET}")
+        except Exception as e:
+            print(f"{Colors.YELLOW}⚠ Could not validate API key: {e}{Colors.RESET}")
+            confirm = input(f"{Colors.YELLOW}Continue anyway? (y/N): {Colors.RESET}").strip().lower()
+            if confirm not in ['y', 'yes']:
+                print(f"{Colors.CYAN}Edit cancelled.{Colors.RESET}")
+                return
+        
+        config = self.ai_manager.config
+        success = self.ai_manager.configure(
+            api_key=new_key,
+            model=config.model.value,
+            max_tokens=config.max_tokens,
+            temperature=config.temperature
+        )
+        
+        if success:
+            print(f"\n{Colors.GREEN}✅ API key updated successfully!{Colors.RESET}")
+            self._show_api_key_status()
+        else:
+            print(f"\n{Colors.RED}❌ Failed to update API key{Colors.RESET}")
+    
+    def _handle_delete_api_key(self) -> None:
+        """Handle deleting the API key."""
+        if not self.ai_manager.is_configured():
+            print(f"{Colors.RED}No API key configured to delete.{Colors.RESET}")
+            return
+        
+        print(f"\n{Colors.CYAN}🗑️ Delete API Key{Colors.RESET}")
+        
+        current_key = self.ai_manager.config.api_key
+        masked_key = current_key[:8] + "*" * (len(current_key) - 12) + current_key[-4:] if len(current_key) > 12 else "*" * len(current_key)
+        print(f"Current key: {masked_key}")
+        
+        confirm = input(f"\n{Colors.YELLOW}Are you sure you want to delete the API key? (y/N): {Colors.RESET}").strip().lower()
+        if confirm not in ['y', 'yes']:
+            print(f"{Colors.CYAN}Deletion cancelled.{Colors.RESET}")
+            return
+        
+        # Delete config file
+        try:
+            if self.ai_manager.config_file.exists():
+                self.ai_manager.config_file.unlink()
+            self.ai_manager.config = None
+            print(f"\n{Colors.GREEN}✅ API key deleted successfully!{Colors.RESET}")
+            print(f"{Colors.DIM}Use 'ai config add-key' to configure a new key.{Colors.RESET}")
+        except Exception as e:
+            print(f"\n{Colors.RED}❌ Failed to delete API key: {e}{Colors.RESET}")
+    
+    def _handle_change_api_key(self) -> None:
+        """Handle changing to a different API key (alias for edit)."""
+        self._handle_edit_api_key()
+    
+    def _show_api_key_status(self) -> None:
+        """Show current API key status with security masking."""
+        if self.ai_manager.is_configured():
+            config = self.ai_manager.config
+            api_key = config.api_key
+            
+            # Mask the API key for security
+            if len(api_key) > 12:
+                masked_key = api_key[:8] + "*" * (len(api_key) - 12) + api_key[-4:]
+            else:
+                masked_key = "*" * len(api_key)
+            
+            print(f"\n{Colors.CYAN}Current Configuration:{Colors.RESET}")
+            print(f"  🔑 API Key: {masked_key}")
+            print(f"  🤖 Model: {config.model.value}")
+            print(f"  📊 Max Tokens: {config.max_tokens}")
+            print(f"  🌡️ Temperature: {config.temperature}")
+        else:
+            print(f"{Colors.YELLOW}No API key configured{Colors.RESET}")
+    
+    def _handle_ai_chat(self, args: List[str]) -> None:
+        """Handle AI chat commands."""
+        if not self.ai_manager:
+            print(f"{Colors.RED}AI service not available{Colors.RESET}")
+            return
+        
+        if not self.ai_manager.is_configured():
+            print(f"{Colors.RED}AI service not configured. Use 'ai config setup' first.{Colors.RESET}")
+            return
+        
+        if not args:
+            print(f"{Colors.RED}Usage: ai chat <message>{Colors.RESET}")
+            return
+        
+        message = ' '.join(args)
+        print(f"\n{Colors.CYAN}🤖 Sending message to AI...{Colors.RESET}")
+        
+        import asyncio
+        async def chat_with_ai():
+            try:
+                response = await self.ai_manager.chat(message, use_context=True)
+                
+                if response.success:
+                    print(f"\n{Colors.GREEN}🤖 AI Response:{Colors.RESET}")
+                    print(f"{response.content}")
+                    
+                    # Show metadata if verbose
+                    if self.verbose:
+                        print(f"\n{Colors.DIM}[Model: {response.model}, Time: {response.response_time:.2f}s, Tokens: {response.usage.get('totalTokenCount', 'N/A')}]{Colors.RESET}")
+                    
+                    # Log the interaction
+                    self.log_message(f"AI Chat - User: {message}", "ai_user")
+                    self.log_message(f"AI Chat - Assistant: {response.content[:200]}...", "ai_assistant")
+                    
+                else:
+                    print(f"\n{Colors.RED}❌ AI Error: {response.error}{Colors.RESET}")
+                    self.log_message(f"AI Chat Error: {response.error}", "ai_error")
+                    
+            except Exception as e:
+                print(f"\n{Colors.RED}❌ Chat error: {e}{Colors.RESET}")
+                self.log_message(f"AI Chat Exception: {e}", "ai_error")
+        
+        asyncio.run(chat_with_ai())
+    
+    def _handle_ai_status(self) -> None:
+        """Show AI service status."""
+        if not self.ai_manager:
+            print(f"{Colors.RED}AI service not available{Colors.RESET}")
+            return
+        
+        print(f"\n{Colors.CYAN}🤖 AI Service Status{Colors.RESET}")
+        
+        if self.ai_manager.is_configured():
+            config = self.ai_manager.config
+            api_key = config.api_key
+            
+            # Mask the API key for security
+            if len(api_key) > 12:
+                masked_key = api_key[:8] + "*" * (len(api_key) - 12) + api_key[-4:]
+            else:
+                masked_key = "*" * len(api_key)
+            
+            print(f"  Status: {Colors.GREEN}Configured{Colors.RESET}")
+            print(f"  🔑 API Key: {masked_key}")
+            print(f"  🤖 Provider: {config.provider.value}")
+            print(f"  📊 Model: {config.model.value}")
+            print(f"  📊 Max Tokens: {config.max_tokens}")
+            print(f"  🌡️ Temperature: {config.temperature}")
+            print(f"  🔗 Context integration: {'Enabled' if config.enable_context_integration else 'Disabled'}")
+            print(f"  📡 Streaming: {'Enabled' if config.enable_streaming else 'Disabled'}")
+        else:
+            print(f"  Status: {Colors.YELLOW}Not configured{Colors.RESET}")
+            print(f"  🔧 Use 'ai config setup' or 'ai config add-key' to configure")
+        
+        # Show integration status
+        print(f"\n{Colors.CYAN}Integration Status:{Colors.RESET}")
+        print(f"  🧠 Context manager: {'Available' if hasattr(self, 'ctx') else 'Not available'}")
+        print(f"  💬 Chat manager: {'Available' if hasattr(self, 'chat') else 'Not available'}")
+        print(f"  💾 Terminal persistence: {'Available' if hasattr(self, 'session_bridge') else 'Not available'}")
+        
+        # Show available commands
+        print(f"\n{Colors.CYAN}Available Commands:{Colors.RESET}")
+        print(f"  🔧 Configuration: setup, show, test, add-key, edit-key, delete-key")
+        print(f"  💬 Interaction: chat, status, help")
+    
+    def _handle_ai_help(self) -> None:
+        """Show AI command help."""
+        print(f"\n{Colors.CYAN}🤖 AI Commands Help{Colors.RESET}")
+        print(f"\n{Colors.YELLOW}Configuration & Setup:{Colors.RESET}")
+        print(f"  ai config setup     - Interactive setup with latest Gemini models and validation")
+        print(f"  ai config show      - Show current configuration with masked API key")
+        print(f"  ai config test      - Test AI connection with current model")
+        print(f"\n{Colors.YELLOW}API Key Management:{Colors.RESET}")
+        print(f"  ai config add-key   - Add or replace API key with real-time validation")
+        print(f"  ai config edit-key  - Edit current API key with validation")
+        print(f"  ai config change-key - Change to different API key (alias for edit)")
+        print(f"  ai config delete-key - Remove API key and configuration completely")
+        print(f"\n{Colors.YELLOW}AI Interaction:{Colors.RESET}")
+        print(f"  ai chat <message>   - Chat with AI using project context and session history")
+        print(f"  ai status           - Show detailed AI service and integration status")
+        print(f"  ai help             - Show this comprehensive help")
+        print(f"\n{Colors.GREEN}Available Models (Latest Only):{Colors.RESET}")
+        print(f"  🚀 Gemini 2.0 Flash (Latest Experimental)")
+        print(f"  ⚡ Gemini 1.5 Pro (Latest Stable)")
+        print(f"  🔥 Gemini 1.5 Flash (Latest Stable) - Default")
+        print(f"  🏃 Gemini 1.5 Flash 8B (Fastest)")
+        print(f"\n{Colors.GREEN}Quick Start Examples:{Colors.RESET}")
+        print(f"  ai config setup")
+        print(f"  ai config add-key")
+        print(f"  ai chat How do I create a Python virtual environment?")
+        print(f"  ai chat Explain this code: def fibonacci(n): return n if n <= 1 else fib(n-1) + fib(n-2)")
+        print(f"  ai chat Help me debug this error: NameError")
+        print(f"\n{Colors.CYAN}Key Features:{Colors.RESET}")
+        print(f"  ✨ Real-time API key validation during setup")
+        print(f"  🔒 Secure API key storage with masking")
+        print(f"  🧠 Context-aware responses using project files and session history")
+        print(f"  🔄 Seamless integration with terminal workflow")
+        print(f"  🚀 Always uses latest Gemini models")
+        print(f"\n{Colors.DIM}Note: AI responses use context from your current project and session{Colors.RESET}")
 
 def main():
     """Main entry point for the robust terminal interface."""

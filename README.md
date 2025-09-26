@@ -19,6 +19,7 @@ The AI Terminal Workflow is a sophisticated terminal interface that bridges the 
 ### Key Features
 - **🚀 Project Management**: Automatic project detection, creation, and switching
 - **✅ Task Management**: Create, update, and track tasks with priority levels
+- **🤖 AI Assistant**: Google Gemini integration for context-aware development help
 - **💬 Message System**: Persistent message history with export capabilities
 - **🧠 Chat Memory**: JSONL-based chat transcripts with auto-summaries every 5 turns
 - **🔄 Session Bridge**: Seamless context preservation across sessions
@@ -203,6 +204,18 @@ python test_imports.py
 - `task priority <id> <level>` - Set task priority
 - `task delete <id>` - Delete a task
 
+#### 🤖 AI Assistant Commands (NEW!)
+- `ai config setup` - Interactive setup with latest Gemini models and real-time API key validation
+- `ai config show` - Show current AI configuration with masked API key
+- `ai config test` - Test AI connection with current configuration
+- `ai config add-key` - Add or replace API key with validation
+- `ai config edit-key` - Edit current API key with validation
+- `ai config change-key` - Change to different API key (alias for edit)
+- `ai config delete-key` - Remove API key and configuration completely
+- `ai chat <message>` - Chat with AI using context from your project and session
+- `ai status` - Show detailed AI service and integration status
+- `ai help` - Show comprehensive AI commands help
+
 #### Message System
 - `message send <content>` - Send a message
 - `message history` - View message history
@@ -243,6 +256,74 @@ python test_imports.py
 - `exit` - Exit the interface
 
 ### Advanced Features
+
+#### 🤖 AI Assistant Setup
+To use the AI features, you'll need:
+1. **Google Gemini API Key**: Get one from [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. **aiohttp library**: Install with `pip install aiohttp`
+
+**Setting up AI:**
+```bash
+# Install required dependency
+pip install aiohttp
+
+# Launch terminal and configure AI
+python launch.py
+
+# In the terminal interface - Multiple setup options:
+ai config setup     # Interactive full setup with latest models
+ai config add-key   # Quick API key setup with validation
+
+# Choose from 4 latest Gemini models:
+# 1. Gemini 2.0 Flash (Latest Experimental)
+# 2. Gemini 1.5 Pro (Latest)
+# 3. Gemini 1.5 Flash (Latest) - Default
+# 4. Gemini 1.5 Flash 8B (Fastest)
+
+# API key is validated in real-time during setup
+
+# Test the connection
+ai config test
+
+# Start chatting with AI!
+ai chat How do I create a Python virtual environment?
+```
+
+**API Key Management:**
+```bash
+# Add or replace API key (with real-time validation)
+ai config add-key
+
+# Edit existing API key (validates before saving)
+ai config edit-key
+
+# View current configuration (with masked key for security)
+ai config show
+
+# Remove API key completely
+ai config delete-key
+
+# Check comprehensive AI service status
+ai status
+
+# Get help with all AI commands
+ai help
+```
+
+**Latest Gemini Models Available:**
+- 🚀 **Gemini 2.0 Flash Experimental** - Cutting-edge experimental model
+- ⚡ **Gemini 1.5 Pro Latest** - Most capable stable model
+- 🔥 **Gemini 1.5 Flash Latest** - Balanced speed and capability (default)
+- 🏃 **Gemini 1.5 Flash 8B** - Fastest lightweight model
+
+**AI Features:**
+- ✨ **Context-aware responses** using your project files and session history
+- 📝 **Code explanation and analysis**
+- ⚙️ **Debug assistance and error resolution**
+- 🚀 **Development workflow optimization**
+- 📚 **Documentation and best practices**
+- 🔑 **Real-time API key validation** ensures valid keys before setup
+- 🤖 **Latest Gemini models** including Gemini 2.0 Flash (only latest versions)
 
 #### Session Management
 - Sessions are automatically saved and restored
