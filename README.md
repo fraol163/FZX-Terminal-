@@ -811,8 +811,8 @@ coverage run -m pytest tests/   # Coverage analysis
 #### **Standalone Deployment**
 ```bash
 # Clone and setup
-git clone https://github.com/your-org/fzx-terminal.git
-cd fzx-terminal
+git clone https://github.com/fraol163/FZX-Terminal-.git
+cd FZX-Terminal-
 pip install -r requirements.txt
 
 # Configure environment
@@ -1042,29 +1042,6 @@ grep "performance" .terminal_data/logs/*.log
 ```
 
 ---
-
-## 🤝 **Contributing & Support**
-
-### **Development Setup**
-
-```bash
-# Fork and clone
-git clone https://github.com/your-username/fzx-terminal.git
-cd fzx-terminal
-
-# Setup development environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements-dev.txt
-
-# Run in development mode
-python terminal_interface.py --dev-mode
-
-# Run tests
-pytest tests/
-coverage run -m pytest tests/
-coverage report
-```
 
 ### **Contribution Guidelines**
 
