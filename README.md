@@ -142,8 +142,8 @@ Access via: `build browse-models`
 
 ```bash
 # 1. Clone and verify
-git clone https://github.com/your-org/fzx-terminal.git
-cd fzx-terminal
+git clone https://github.com/fraol163/FZX-Terminal-.git
+cd FZX-Terminal-
 python test_imports.py  # ✅ Should show: "All modules imported successfully!"
 
 # 2. Install AI dependencies (optional but recommended)
