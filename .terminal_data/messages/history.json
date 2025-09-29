@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "id": "msg_d8927a60",
+    "content": "Command executed: exit",
+    "timestamp": "2025-09-29T18:00:15.302953",
+    "message_type": "command",
+    "project_id": "proj_a84c3753",
+    "session_id": "session_514e5e81_1759145607",
+    "metadata": {}
+  }
+]

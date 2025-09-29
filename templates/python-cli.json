@@ -1,0 +1,34 @@
+{
+  "name": "Python CLI Tool",
+  "description": "Modern Python CLI application with Click framework",
+  "build_type": "cli",
+  "framework": "click",
+  "language": "python",
+  "files": {
+    "pyproject.toml": "[build-system]\nrequires = [\"setuptools>=61.0\", \"wheel\"]\nbuild-backend = \"setuptools.build_meta\"\n\n[project]\nname = \"{{project_name}}\"\nversion = \"0.1.0\"\ndescription = \"A modern Python CLI tool\"\nauthors = [{name = \"Your Name\", email = \"your.email@example.com\"}]\nreadme = \"README.md\"\nrequires-python = \">=3.8\"\nclassifiers = [\n    \"Development Status :: 3 - Alpha\",\n    \"Intended Audience :: Developers\",\n    \"License :: OSI Approved :: MIT License\",\n    \"Programming Language :: Python :: 3\",\n    \"Programming Language :: Python :: 3.8\",\n    \"Programming Language :: Python :: 3.9\",\n    \"Programming Language :: Python :: 3.10\",\n    \"Programming Language :: Python :: 3.11\",\n]\ndependencies = [\n    \"click>=8.0.0\",\n    \"rich>=13.0.0\",\n]\n\n[project.optional-dependencies]\ndev = [\n    \"pytest>=7.0.0\",\n    \"black>=22.0.0\",\n    \"flake8>=5.0.0\",\n    \"mypy>=1.0.0\",\n]\n\n[project.scripts]\n{{project_name}} = \"{{project_name}}.cli:main\"\n\n[tool.setuptools.packages.find]\nwhere = [\".\"]\ninclude = [\"{{project_name}}*\"]\n\n[tool.black]\nline-length = 88\ntarget-version = ['py38']\n\n[tool.mypy]\npython_version = \"3.8\"\nwarn_return_any = true\nwarn_unused_configs = true",
+    "{{project_name}}/__init__.py": "\"\"\"{{project_name}} - A modern Python CLI tool.\"\"\"\n\n__version__ = \"0.1.0\"\n",
+    "{{project_name}}/cli.py": "\"\"\"Main CLI interface for {{project_name}}.\"\"\"\n\nimport click\nfrom rich.console import Console\nfrom rich.table import Table\n\nconsole = Console()\n\n@click.group()\n@click.version_option()\ndef main():\n    \"\"\"{{project_name}} - A modern Python CLI tool.\"\"\"\n    pass\n\n@main.command()\n@click.option('--name', default='World', help='Name to greet.')\n@click.option('--count', default=1, help='Number of greetings.')\ndef hello(name, count):\n    \"\"\"Simple program that greets NAME for a total of COUNT times.\"\"\"\n    for i in range(count):\n        console.print(f\"Hello {name}!\", style=\"bold green\")\n\n@main.command()\ndef status():\n    \"\"\"Show application status.\"\"\"\n    table = Table(title=\"{{project_name}} Status\")\n    \n    table.add_column(\"Property\", style=\"cyan\", no_wrap=True)\n    table.add_column(\"Value\", style=\"magenta\")\n    \n    table.add_row(\"Status\", \"\u2705 Running\")\n    table.add_row(\"Version\", \"0.1.0\")\n    table.add_row(\"Python\", \"\ud83d\udc0d Ready\")\n    \n    console.print(table)\n\nif __name__ == '__main__':\n    main()\n",
+    "tests/__init__.py": "",
+    "tests/test_cli.py": "\"\"\"Tests for CLI functionality.\"\"\"\n\nimport pytest\nfrom click.testing import CliRunner\nfrom {{project_name}}.cli import main\n\ndef test_hello_command():\n    \"\"\"Test hello command.\"\"\"\n    runner = CliRunner()\n    result = runner.invoke(main, ['hello'])\n    assert result.exit_code == 0\n    assert 'Hello World!' in result.output\n\ndef test_hello_with_name():\n    \"\"\"Test hello command with custom name.\"\"\"\n    runner = CliRunner()\n    result = runner.invoke(main, ['hello', '--name', 'Python'])\n    assert result.exit_code == 0\n    assert 'Hello Python!' in result.output\n\ndef test_status_command():\n    \"\"\"Test status command.\"\"\"\n    runner = CliRunner()\n    result = runner.invoke(main, ['status'])\n    assert result.exit_code == 0\n    assert 'Status' in result.output\n",
+    "README.md": "# {{project_name}}\n\nA modern Python CLI tool built with Click and Rich.\n\n## Installation\n\n```bash\n# Install in development mode\npip install -e .\n\n# Or install from PyPI (when published)\npip install {{project_name}}\n```\n\n## Usage\n\n```bash\n# Show help\n{{project_name}} --help\n\n# Greet someone\n{{project_name}} hello --name \"Developer\"\n\n# Show status\n{{project_name}} status\n```\n\n## Development\n\n```bash\n# Install development dependencies\npip install -e \".[dev]\"\n\n# Run tests\npytest\n\n# Format code\nblack .\n\n# Lint code\nflake8 .\n\n# Type checking\nmypy .\n```\n\n## Features\n\n- \ud83d\uddb1\ufe0f Modern CLI with Click\n- \ud83c\udfa8 Beautiful output with Rich\n- \ud83e\uddea Comprehensive test suite\n- \ud83d\udd27 Development tools included\n- \ud83d\udce6 Ready for PyPI distribution\n\n---\n\nBuilt with \u2764\ufe0f using FZX-Terminal Building Agent\n",
+    ".gitignore": "__pycache__/\n*.py[cod]\n*$py.class\n*.so\n.Python\nbuild/\ndevelop-eggs/\ndist/\ndownloads/\neggs/\n.eggs/\nlib/\nlib64/\nparts/\nsdist/\nvar/\nwheels/\n*.egg-info/\n.installed.cfg\n*.egg\nMANIFEST\n\n.env\n.venv\nenv/\nvenv/\nENV/\nenv.bak/\nvenv.bak/\n\n.pytest_cache/\n.mypy_cache/\n.coverage\nhtmlcov/\n.tox/\n"
+  },
+  "directories": [
+    "{{project_name}}",
+    "tests"
+  ],
+  "commands": [
+    {
+      "name": "install",
+      "command": "pip install -e ."
+    },
+    {
+      "name": "test",
+      "command": "pytest"
+    },
+    {
+      "name": "run",
+      "command": "{{project_name}} --help"
+    }
+  ]
+}

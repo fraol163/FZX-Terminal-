@@ -1,0 +1,53 @@
+{
+  "name": "Next.js Full-Stack Application",
+  "description": "Modern full-stack web application with Next.js 14",
+  "build_type": "fullstack",
+  "framework": "nextjs",
+  "language": "javascript",
+  "files": {
+    "package.json": {
+      "name": "{{project_name}}",
+      "version": "0.1.0",
+      "private": true,
+      "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint"
+      },
+      "dependencies": {
+        "next": "14.0.0",
+        "react": "^18",
+        "react-dom": "^18"
+      },
+      "devDependencies": {
+        "eslint": "^8",
+        "eslint-config-next": "14.0.0"
+      }
+    },
+    "next.config.js": "/** @type {import('next').NextConfig} */\nconst nextConfig = {\n  experimental: {\n    appDir: true,\n  },\n}\n\nmodule.exports = nextConfig\n",
+    "app/layout.js": "import './globals.css'\n\nexport const metadata = {\n  title: '{{project_name}}',\n  description: 'Built with Next.js and FZX-Terminal',\n}\n\nexport default function RootLayout({ children }) {\n  return (\n    <html lang=\"en\">\n      <body>{children}</body>\n    </html>\n  )\n}\n",
+    "app/page.js": "export default function Home() {\n  return (\n    <main>\n      <div className=\"container\">\n        <h1>Welcome to {{project_name}}</h1>\n        <p>A modern Next.js application built with FZX-Terminal Building Agent.</p>\n        \n        <div className=\"features\">\n          <div className=\"feature\">\n            <h3>\u26a1 Fast</h3>\n            <p>Built with Next.js 14 and React 18</p>\n          </div>\n          <div className=\"feature\">\n            <h3>\ud83c\udfa8 Modern</h3>\n            <p>Clean and responsive design</p>\n          </div>\n          <div className=\"feature\">\n            <h3>\ud83d\ude80 Ready</h3>\n            <p>Production-ready configuration</p>\n          </div>\n        </div>\n      </div>\n    </main>\n  )\n}\n",
+    "app/globals.css": "* {\n  box-sizing: border-box;\n  padding: 0;\n  margin: 0;\n}\n\nhtml,\nbody {\n  max-width: 100vw;\n  overflow-x: hidden;\n  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',\n    'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',\n    'Helvetica Neue', sans-serif;\n}\n\nbody {\n  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n  color: white;\n  min-height: 100vh;\n}\n\n.container {\n  max-width: 1200px;\n  margin: 0 auto;\n  padding: 2rem;\n  text-align: center;\n}\n\nh1 {\n  font-size: 3rem;\n  margin-bottom: 1rem;\n  background: linear-gradient(45deg, #fff, #f0f0f0);\n  background-clip: text;\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n}\n\n.features {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));\n  gap: 2rem;\n  margin-top: 3rem;\n}\n\n.feature {\n  background: rgba(255, 255, 255, 0.1);\n  padding: 2rem;\n  border-radius: 1rem;\n  backdrop-filter: blur(10px);\n  border: 1px solid rgba(255, 255, 255, 0.2);\n}\n\n.feature h3 {\n  font-size: 1.5rem;\n  margin-bottom: 1rem;\n}\n\n@media (max-width: 768px) {\n  h1 {\n    font-size: 2rem;\n  }\n  \n  .container {\n    padding: 1rem;\n  }\n}\n",
+    "README.md": "# {{project_name}}\n\nA modern Next.js full-stack application with cutting-edge features.\n\n## Getting Started\n\n```bash\n# Install dependencies\nnpm install\n\n# Start development server\nnpm run dev\n\n# Build for production\nnpm run build\n\n# Start production server\nnpm start\n```\n\nOpen [http://localhost:3000](http://localhost:3000) with your browser to see the result.\n\n## Features\n\n- \u26a1 Next.js 14 with App Router\n- \u269b\ufe0f React 18 with modern features\n- \ud83c\udfa8 Beautiful gradient design\n- \ud83d\udcf1 Fully responsive\n- \ud83d\ude80 Production-ready\n- \ud83d\udd27 ESLint configuration\n\n## Project Structure\n\n```\napp/\n\u251c\u2500\u2500 layout.js       # Root layout\n\u251c\u2500\u2500 page.js         # Home page\n\u2514\u2500\u2500 globals.css     # Global styles\n```\n\n## Scripts\n\n- `npm run dev` - Start development server\n- `npm run build` - Build for production\n- `npm run start` - Start production server\n- `npm run lint` - Run ESLint\n\n---\n\nBuilt with \u2764\ufe0f using FZX-Terminal Building Agent\n",
+    ".gitignore": "# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.\n\n# dependencies\n/node_modules\n/.pnp\n.pnp.js\n\n# testing\n/coverage\n\n# next.js\n/.next/\n/out/\n\n# production\n/build\n\n# misc\n.DS_Store\n*.pem\n\n# debug\nnpm-debug.log*\nyarn-debug.log*\nyarn-error.log*\n\n# local env files\n.env*.local\n\n# vercel\n.vercel\n\n# typescript\n*.tsbuildinfo\nnext-env.d.ts"
+  },
+  "directories": [
+    "app",
+    "public"
+  ],
+  "commands": [
+    {
+      "name": "install",
+      "command": "npm install"
+    },
+    {
+      "name": "dev",
+      "command": "npm run dev"
+    },
+    {
+      "name": "build",
+      "command": "npm run build"
+    }
+  ]
+}

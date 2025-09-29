@@ -24,11 +24,17 @@ try:
     from chat_manager import get_chat_manager
     from project_inference import ProjectInferenceEngine
     from ai_service import get_ai_manager
+    from building_agent import get_building_agent
+    from advanced_building_agent import get_advanced_building_agent
+    from enhanced_ai_provider import get_enhanced_ai_provider
 except ImportError as e:
     print(f"Warning: Could not import workflow components: {e}")
     print("Some features may be limited.")
     ProjectInferenceEngine = None
     get_ai_manager = None
+    get_building_agent = None
+    get_advanced_building_agent = None
+    get_enhanced_ai_provider = None
 
 class Colors:
     RESET = '\033[0m'
@@ -224,6 +230,29 @@ class RobustTerminalInterface:
             except Exception as e:
                 self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
         
+        # Building agent integration
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        # Enhanced AI provider
+        self.enhanced_ai_provider = None
+        if get_enhanced_ai_provider:
+            try:
+                self.enhanced_ai_provider = get_enhanced_ai_provider()
+            except Exception as e:
+                self.log_message(f"Warning: Enhanced AI provider initialization failed: {e}", "warning")
+        
         self._register_commands()
         
         self.initialize_system()
@@ -416,6 +445,7 @@ class RobustTerminalInterface:
         nav_categories = [
             ("🚀", "PROJECTS", "project list | create | switch | info", accent_gold),
             ("✅", "TASKS", "task list | create | update | priority", neon_cyan),
+            ("🔨", "BUILD", "build describe | setup-ai | analyze | status", accent_gold),
             ("🤖", "AI ASSISTANT", "ai config setup | ai chat | ai help", gradient_bot),
             ("⚙️", "SETTINGS", "config | theme | backup | performance", accent_silver),
             ("📚", "HELP", "help | status | clear", green)
@@ -551,7 +581,8 @@ class RobustTerminalInterface:
         quick_commands = [
             ("🚀", "project create <name>", "Initialize a new project workspace with intelligent setup"),
             ("✅", "task create <title>", "Add development tasks with priority tracking and progress monitoring"),
-            ("🤖", "ai config setup", "Set up AI assistant with latest Gemini models and validation"),
+            ("🔨", "build describe '<description>'", "Generate any project from natural language with AI"),
+            ("🤖", "build setup-ai openrouter", "Setup OpenRouter AI with 100+ models for enhanced generation"),
             ("💬", "ai chat <message>", "Chat with AI using your project context for development help"),
             ("📚", "help", "View complete command reference, documentation, and advanced features")
         ]
@@ -704,6 +735,24 @@ class RobustTerminalInterface:
                 ("ai status", "Show detailed AI service and integration status", "📊"),
                 ("ai help", "Show comprehensive AI commands help", "❓")
             ],
+            "🔨 Universal Building Agent": [
+                ("build web <name>", "Create web application (React, Vue, Angular)", "🌐"),
+                ("build api <name>", "Create API server (Node.js, Python, Go)", "⚡"),
+                ("build desktop <name>", "Create desktop app (Electron, Tauri)", "🖥️"),
+                ("build mobile <name>", "Create mobile app (React Native, Flutter)", "📱"),
+                ("build cli <name>", "Create CLI tool", "⌨️"),
+                ("build library <name>", "Create reusable library", "📚"),
+                ("build describe '<desc>'", "Generate project from natural language description", "🧠"),
+                ("build setup-ai <provider>", "Setup AI provider (openrouter, gemini) with model selection", "🤖"),
+                ("build ai-status", "Show AI provider configuration and statistics", "📊"),
+                ("build detect", "Detect current project type and framework", "🔍"),
+                ("build suggest", "Get intelligent build suggestions", "💡"),
+                ("build analyze", "Analyze generated code for bugs and improvements", "🔍"),
+                ("build status", "Show terminal status, resources, and build health", "📊"),
+                ("build history", "Show build history and previous projects", "📜"),
+                ("build templates", "List available project templates", "📋"),
+                ("build check-updates", "Check for AI model updates and system health", "🔄")
+            ],
             "🧠 Chat & Memory": [
                 ("chat add <user|assistant|system> <text>", "Append a chat message to durable log", "➕"),
                 ("chat prompt", "Build token-aware prompt from recent turns", "🧪"),
@@ -747,7 +796,8 @@ class RobustTerminalInterface:
                 ("cd <path>", "Change directory", "📁"),
                 ("ls / dir", "List directory contents", "📂"),
                 ("pwd", "Show current directory", "📍"),
-                ("clear", "Clear screen", "🧹")
+                ("clear", "Clear screen", "🧹"),
+                ("clear all", "Clear ALL data - comprehensive system reset", "🗥️")
             ],
             "📁 File Operations": [
                 ("@path/to/file", "Direct file access and preview", "📄"),
@@ -2451,8 +2501,11 @@ class RobustTerminalInterface:
                 self.handle_memory_command(args)
                 
             elif command == 'clear':
-                os.system('cls' if os.name == 'nt' else 'clear')
-                self.display_header()
+                if args and args[0].lower() == 'all':
+                    self._handle_clear_all_command()
+                else:
+                    os.system('cls' if os.name == 'nt' else 'clear')
+                    self.display_header()
                 
             elif command == 'back':
                 self.handle_back_command(args)
@@ -2646,8 +2699,9 @@ class RobustTerminalInterface:
                 'remember': self.handle_remember_command,
                 'perform': lambda args: self._route_perform(args),
                 'memory': self.handle_memory_command,
-                'clear': lambda args: (os.system('cls' if os.name == 'nt' else 'clear'), self.display_header()),
+                'clear': lambda args: self._handle_clear_command(args),
                 'ai': self.handle_ai_command,
+                'build': self.handle_build_command,
             }
         except Exception:
             # Non-fatal; fallback to legacy routing
@@ -3190,6 +3244,889 @@ class RobustTerminalInterface:
         print(f"  🔄 Seamless integration with terminal workflow")
         print(f"  🚀 Always uses latest Gemini models")
         print(f"\n{Colors.DIM}Note: AI responses use context from your current project and session{Colors.RESET}")
+
+    def handle_build_command(self, args: List[str]) -> None:
+        """Handle universal building agent commands with AI integration."""
+        if not self.building_agent and not self.advanced_building_agent:
+            print(f"{Colors.RED}Building agent not available{Colors.RESET}")
+            return
+        
+        if not args:
+            print(f"{Colors.RED}Usage: build <command> [options]{Colors.RESET}")
+            print(f"\n{Colors.CYAN}🔨 Project Creation:{Colors.RESET}")
+            print(f"  web <name>           - Create web application (React, Vue, Angular)")
+            print(f"  api <name>           - Create API server (Node.js, Python, Go)")
+            print(f"  desktop <name>       - Create desktop app (Electron, Tauri)")
+            print(f"  mobile <name>        - Create mobile app (React Native, Flutter)")
+            print(f"  cli <name>           - Create CLI tool")
+            print(f"  library <name>       - Create reusable library")
+            print(f"\n{Colors.CYAN}🧠 AI-Powered Generation:{Colors.RESET}")
+            print(f"  describe '<description>' - Generate project from natural language")
+            print(f"  setup-ai <provider>     - Setup AI provider (openrouter, gemini)")
+            print(f"  ai-status              - Show AI provider configuration")
+            print(f"\n{Colors.CYAN}🔍 Analysis & Intelligence:{Colors.RESET}")
+            print(f"  detect              - Detect current project type")
+            print(f"  suggest             - Get build suggestions")
+            print(f"  analyze             - Analyze generated code")
+            print(f"  status              - Show terminal and build status")
+            print(f"\n{Colors.CYAN}📊 History & Management:{Colors.RESET}")
+            print(f"  history             - Show build history")
+            print(f"  templates           - List available templates")
+            print(f"  check-updates       - Check for AI model updates")
+            print(f"  browse-models       - Browse and explore available AI models")
+            print(f"\n{Colors.CYAN}🧹 Clear & Reset:{Colors.RESET}")
+            print(f"  clear-history       - Clear build generation history")
+            print(f"  clear-cache         - Clear AI models cache")
+            print(f"  clear-configs       - Clear AI provider configurations")
+            print(f"  clear-all           - Clear all building agent data")
+            return
+        
+        subcommand = args[0].lower()
+        
+        # Route to appropriate handler
+        if subcommand == 'describe':
+            self._handle_build_describe(args[1:] if len(args) > 1 else [])
+        elif subcommand == 'setup-ai':
+            self._handle_build_setup_ai(args[1:] if len(args) > 1 else [])
+        elif subcommand == 'ai-status':
+            self._handle_build_ai_status()
+        elif subcommand == 'analyze':
+            self._handle_build_analyze(args[1:] if len(args) > 1 else [])
+        elif subcommand == 'status':
+            self._handle_build_status()
+        elif subcommand == 'check-updates':
+            self._handle_build_check_updates()
+        elif subcommand == 'browse-models':
+            self._handle_build_browse_models()
+        elif subcommand == 'clear-history':
+            self._handle_build_clear_history()
+        elif subcommand == 'clear-cache':
+            self._handle_build_clear_cache()
+        elif subcommand == 'clear-configs':
+            self._handle_build_clear_configs()
+        elif subcommand == 'clear-all':
+            self._handle_build_clear_all()
+        elif subcommand == 'detect':
+            self._handle_build_detect()
+        elif subcommand == 'suggest':
+            self._handle_build_suggest()
+        elif subcommand == 'history':
+            self._handle_build_history()
+        elif subcommand == 'templates':
+            self._handle_build_templates()
+        elif subcommand in ['web', 'api', 'desktop', 'mobile', 'cli', 'library', 'microservice', 'fullstack']:
+            if len(args) < 2:
+                print(f"{Colors.RED}Usage: build {subcommand} <name> [--framework <framework>]{Colors.RESET}")
+                return
+            self._handle_build_create(subcommand, args[1:])
+        else:
+            print(f"{Colors.RED}Unknown build command: {subcommand}{Colors.RESET}")
+            print(f"Use 'build' without arguments to see available commands")
+    
+    def _handle_build_detect(self) -> None:
+        """Detect current project type and framework."""
+        try:
+            build_type, framework, info = self.building_agent.detect_project_type()
+            
+            print(f"\n{Colors.CYAN}🔍 Project Detection Results:{Colors.RESET}")
+            print(f"  Build Type: {Colors.GREEN}{build_type.value}{Colors.RESET}")
+            print(f"  Framework: {Colors.GREEN}{framework.value if framework else 'default'}{Colors.RESET}")
+            print(f"  Confidence: {Colors.YELLOW}{info['confidence']:.1%}{Colors.RESET}")
+            
+            if info['indicators']:
+                print(f"\n{Colors.CYAN}Detection Indicators:{Colors.RESET}")
+                for indicator in info['indicators']:
+                    print(f"  • {indicator}")
+            
+            if info['files']:
+                print(f"\n{Colors.DIM}Files found: {', '.join(info['files'][:10])}{Colors.RESET}")
+                if len(info['files']) > 10:
+                    print(f"{Colors.DIM}  ... and {len(info['files']) - 10} more{Colors.RESET}")
+                    
+        except Exception as e:
+            print(f"{Colors.RED}Detection failed: {e}{Colors.RESET}")
+    
+    def _handle_build_suggest(self) -> None:
+        """Get intelligent build suggestions."""
+        try:
+            suggestions = self.building_agent.get_build_suggestions()
+            
+            if not suggestions:
+                print(f"{Colors.YELLOW}No build suggestions available{Colors.RESET}")
+                return
+            
+            print(f"\n{Colors.CYAN}🚀 Build Suggestions:{Colors.RESET}")
+            for i, suggestion in enumerate(suggestions[:8], 1):
+                type_icon = "🔨" if suggestion['type'] == 'create' else "⚡"
+                print(f"  {i}. {type_icon} {Colors.BOLD}{suggestion['title']}{Colors.RESET}")
+                print(f"     {Colors.DIM}{suggestion['description']}{Colors.RESET}")
+                print(f"     {Colors.GREEN}Command:{Colors.RESET} {suggestion['command']}")
+                print()
+                
+        except Exception as e:
+            print(f"{Colors.RED}Failed to get suggestions: {e}{Colors.RESET}")
+    
+    def _handle_build_history(self) -> None:
+        """Show build history."""
+        try:
+            history = self.building_agent.get_build_history()
+            
+            if not history:
+                print(f"{Colors.YELLOW}No build history found{Colors.RESET}")
+                return
+            
+            print(f"\n{Colors.CYAN}📚 Build History:{Colors.RESET}")
+            for entry in history[-10:]:  # Show last 10
+                config = entry['config']
+                status = entry['status']
+                timestamp = entry['timestamp'][:19]  # Remove microseconds
+                
+                status_icon = "✅" if status == "completed" else "❌" if status == "failed" else "⏳"
+                status_color = Colors.GREEN if status == "completed" else Colors.RED if status == "failed" else Colors.YELLOW
+                
+                print(f"  {status_icon} {Colors.BOLD}{config['name']}{Colors.RESET}")
+                print(f"    Type: {config['build_type']} | Framework: {config.get('framework', 'default')}")
+                print(f"    Status: {status_color}{status}{Colors.RESET} | {timestamp}")
+                print()
+                
+        except Exception as e:
+            print(f"{Colors.RED}Failed to get build history: {e}{Colors.RESET}")
+    
+    def _handle_build_templates(self) -> None:
+        """List available project templates."""
+        try:
+            if hasattr(self.building_agent, 'project_templates') and self.building_agent.project_templates:
+                templates = self.building_agent.project_templates.get_available_templates()
+                
+                if not templates:
+                    print(f"{Colors.YELLOW}No templates available{Colors.RESET}")
+                    return
+                
+                print(f"\n{Colors.CYAN}📋 Available Templates:{Colors.RESET}")
+                for template in templates:
+                    print(f"  • {Colors.BOLD}{template['name']}{Colors.RESET}")
+                    print(f"    Key: {template['key']} | Type: {template['build_type']} | Framework: {template['framework']}")
+                    if template['description']:
+                        print(f"    {Colors.DIM}{template['description']}{Colors.RESET}")
+                    print()
+            else:
+                print(f"{Colors.YELLOW}Template system not available{Colors.RESET}")
+                
+        except Exception as e:
+            print(f"{Colors.RED}Failed to list templates: {e}{Colors.RESET}")
+    
+    def _handle_build_create(self, build_type: str, args: List[str]) -> None:
+        """Handle project creation."""
+        try:
+            project_name = args[0]
+            
+            # Parse additional arguments
+            framework = None
+            language = "javascript"
+            features = []
+            
+            i = 1
+            while i < len(args):
+                if args[i] == '--framework' and i + 1 < len(args):
+                    framework_str = args[i + 1]
+                    try:
+                        from building_agent import Framework
+                        framework = Framework(framework_str)
+                    except ValueError:
+                        print(f"{Colors.YELLOW}Unknown framework: {framework_str}. Using default.{Colors.RESET}")
+                    i += 2
+                elif args[i] == '--language' and i + 1 < len(args):
+                    language = args[i + 1]
+                    i += 2
+                elif args[i] == '--feature' and i + 1 < len(args):
+                    features.append(args[i + 1])
+                    i += 2
+                else:
+                    i += 1
+            
+            # Create build configuration
+            from building_agent import BuildConfig, BuildType
+            config = BuildConfig(
+                name=project_name,
+                build_type=BuildType(build_type),
+                framework=framework,
+                language=language,
+                features=features
+            )
+            
+            print(f"\n{Colors.CYAN}🔨 Creating {build_type} project '{project_name}'...{Colors.RESET}")
+            if framework:
+                print(f"Framework: {framework.value}")
+            if language != "javascript":
+                print(f"Language: {language}")
+            if features:
+                print(f"Features: {', '.join(features)}")
+            
+            # Execute build
+            import asyncio
+            result = asyncio.run(self.building_agent.build_project(config))
+            
+            if result['success']:
+                print(f"\n{Colors.GREEN}✅ {result['message']}{Colors.RESET}")
+                
+                if result['files_created']:
+                    print(f"\n{Colors.CYAN}Files created:{Colors.RESET}")
+                    for file_path in result['files_created'][:10]:  # Show first 10
+                        print(f"  • {file_path}")
+                    if len(result['files_created']) > 10:
+                        print(f"  ... and {len(result['files_created']) - 10} more files")
+                
+                if result['next_steps']:
+                    print(f"\n{Colors.CYAN}Next steps:{Colors.RESET}")
+                    for i, step in enumerate(result['next_steps'], 1):
+                        print(f"  {i}. {step}")
+                        
+            else:
+                print(f"\n{Colors.RED}❌ {result['message']}{Colors.RESET}")
+                
+        except Exception as e:
+            print(f"{Colors.RED}Build failed: {e}{Colors.RESET}")
+    
+    def _handle_build_describe(self, args: List[str]) -> None:
+        """Handle natural language project description."""
+        if not args:
+            print(f"{Colors.RED}Usage: build describe '<project description>'{Colors.RESET}")
+            print(f"\n{Colors.CYAN}Examples:{Colors.RESET}")
+            print(f"  build describe 'Create a React todo app with authentication'")
+            print(f"  build describe 'Build a FastAPI server for a blog with database'")
+            print(f"  build describe 'Make a Python CLI tool for file management'")
+            return
+        
+        if not self.advanced_building_agent:
+            print(f"{Colors.RED}Advanced building agent not available{Colors.RESET}")
+            return
+        
+        description = ' '.join(args)
+        print(f"\n{Colors.CYAN}🧠 Processing description:{Colors.RESET} '{description}'")
+        
+        try:
+            # Use asyncio to run the async method
+            import asyncio
+            
+            async def generate_from_desc():
+                result = await self.advanced_building_agent.generate_from_description(description)
+                return result
+            
+            result = asyncio.run(generate_from_desc())
+            
+            if result.success:
+                print(f"\n{Colors.GREEN}✅ {result.message}{Colors.RESET}")
+                
+                if result.files_created:
+                    print(f"\n{Colors.CYAN}Files created:{Colors.RESET}")
+                    for file_path in result.files_created[:15]:  # Show first 15
+                        print(f"  • {file_path}")
+                    if len(result.files_created) > 15:
+                        print(f"  ... and {len(result.files_created) - 15} more files")
+                
+                if result.design_recommendations:
+                    print(f"\n{Colors.CYAN}🎨 Design Recommendations:{Colors.RESET}")
+                    for rec in result.design_recommendations[:10]:
+                        print(f"  • {rec}")
+                
+                if result.performance_metrics:
+                    metrics = result.performance_metrics
+                    print(f"\n{Colors.CYAN}📊 Performance Metrics:{Colors.RESET}")
+                    if 'execution_time' in metrics:
+                        print(f"  ⏱️ Generation time: {metrics['execution_time']:.2f}s")
+                    if 'code_quality_score' in metrics:
+                        print(f"  🏆 Code quality: {metrics['code_quality_score']:.1f}/100")
+                    if 'total_issues' in metrics:
+                        print(f"  ⚠️ Issues found: {metrics['total_issues']}")
+                
+                if result.next_steps:
+                    print(f"\n{Colors.CYAN}Next steps:{Colors.RESET}")
+                    for i, step in enumerate(result.next_steps, 1):
+                        print(f"  {i}. {step}")
+                        
+            else:
+                print(f"\n{Colors.RED}❌ {result.message}{Colors.RESET}")
+                
+                if result.errors:
+                    print(f"\n{Colors.RED}Errors:{Colors.RESET}")
+                    for error in result.errors[:10]:
+                        print(f"  • {error}")
+                        
+        except Exception as e:
+            print(f"{Colors.RED}Description processing failed: {e}{Colors.RESET}")
+    
+    def _handle_build_setup_ai(self, args: List[str]) -> None:
+        """Handle AI provider setup."""
+        if not args:
+            print(f"{Colors.RED}Usage: build setup-ai <provider>{Colors.RESET}")
+            print(f"\n{Colors.CYAN}Available providers:{Colors.RESET}")
+            print(f"  openrouter - OpenRouter (supports 100+ models)")
+            print(f"  gemini     - Google Gemini (free tier available)")
+            return
+        
+        if not self.advanced_building_agent:
+            print(f"{Colors.RED}Advanced building agent not available{Colors.RESET}")
+            return
+        
+        provider = args[0].lower()
+        
+        if provider not in ['openrouter', 'gemini']:
+            print(f"{Colors.RED}Unsupported provider: {provider}{Colors.RESET}")
+            return
+        
+        # Get API key
+        api_key = input(f"\n{Colors.YELLOW}Enter your {provider} API key: {Colors.RESET}").strip()
+        
+        if not api_key:
+            print(f"{Colors.RED}API key cannot be empty{Colors.RESET}")
+            return
+        
+        print(f"\n{Colors.CYAN}🔄 Setting up {provider} provider...{Colors.RESET}")
+        
+        try:
+            import asyncio
+            
+            async def setup_provider():
+                return await self.advanced_building_agent.setup_ai_provider(provider, api_key, interactive=True)
+            
+            success = asyncio.run(setup_provider())
+            
+            if success:
+                print(f"\n{Colors.GREEN}🎉 Successfully configured {provider} provider!{Colors.RESET}")
+                print(f"{Colors.CYAN}You can now use 'build describe' for AI-powered project generation{Colors.RESET}")
+            else:
+                print(f"\n{Colors.RED}❌ Failed to configure {provider} provider{Colors.RESET}")
+                
+        except Exception as e:
+            print(f"{Colors.RED}Setup failed: {e}{Colors.RESET}")
+    
+    def _handle_build_ai_status(self) -> None:
+        """Show AI provider status."""
+        if not self.advanced_building_agent:
+            print(f"{Colors.RED}Advanced building agent not available{Colors.RESET}")
+            return
+        
+        try:
+            status = self.advanced_building_agent.get_terminal_status()
+            ai_status = status.get('ai_provider', {})
+            
+            print(f"\n{Colors.CYAN}🤖 AI Provider Status:{Colors.RESET}")
+            
+            if ai_status.get('configured', False):
+                print(f"  Status: {Colors.GREEN}Configured{Colors.RESET}")
+                print(f"  Provider: {ai_status.get('provider', 'Unknown')}")
+                print(f"  Model: {ai_status.get('model', 'Unknown')}")
+                
+                # Show generation stats
+                gen_stats = status.get('generation_history', {})
+                total = gen_stats.get('total_generations', 0)
+                successful = gen_stats.get('successful_generations', 0)
+                
+                print(f"\n{Colors.CYAN}Generation Statistics:{Colors.RESET}")
+                print(f"  Total generations: {total}")
+                print(f"  Successful: {successful}")
+                if total > 0:
+                    success_rate = (successful / total) * 100
+                    print(f"  Success rate: {success_rate:.1f}%")
+                
+                if gen_stats.get('last_generation'):
+                    print(f"  Last generation: {gen_stats['last_generation'][:19]}")
+                    
+            else:
+                print(f"  Status: {Colors.YELLOW}Not configured{Colors.RESET}")
+                print(f"  Use 'build setup-ai <provider>' to configure")
+                
+        except Exception as e:
+            print(f"{Colors.RED}Failed to get AI status: {e}{Colors.RESET}")
+    
+    def _handle_build_analyze(self, args: List[str]) -> None:
+        """Analyze generated code or current project."""
+        if not self.advanced_building_agent:
+            print(f"{Colors.RED}Advanced building agent not available{Colors.RESET}")
+            return
+        
+        print(f"\n{Colors.CYAN}🔍 Analyzing current workspace...{Colors.RESET}")
+        
+        try:
+            # Get recent generation history
+            history = self.advanced_building_agent.get_generation_history(1)
+            
+            if not history:
+                print(f"{Colors.YELLOW}No recent generations found to analyze{Colors.RESET}")
+                return
+            
+            recent = history[0]
+            result_data = recent.get('result', {})
+            
+            print(f"\n{Colors.CYAN}Analysis of last generation:{Colors.RESET}")
+            print(f"  Project: {recent.get('requirements', {}).get('project_name', 'Unknown')}")
+            print(f"  Generated: {recent['timestamp'][:19]}")
+            
+            if result_data.get('performance_metrics'):
+                metrics = result_data['performance_metrics']
+                
+                print(f"\n{Colors.CYAN}Code Quality Metrics:{Colors.RESET}")
+                if 'code_quality_score' in metrics:
+                    score = metrics['code_quality_score']
+                    color = Colors.GREEN if score >= 80 else Colors.YELLOW if score >= 60 else Colors.RED
+                    print(f"  {color}Quality Score: {score:.1f}/100{Colors.RESET}")
+                
+                if 'total_issues' in metrics:
+                    issues = metrics['total_issues']
+                    color = Colors.GREEN if issues == 0 else Colors.YELLOW if issues < 5 else Colors.RED
+                    print(f"  {color}Issues Found: {issues}{Colors.RESET}")
+                
+                if 'total_suggestions' in metrics:
+                    print(f"  Suggestions: {metrics['total_suggestions']}")
+                
+                print(f"\n{Colors.CYAN}Performance:{Colors.RESET}")
+                if 'execution_time' in metrics:
+                    print(f"  Generation Time: {metrics['execution_time']:.2f}s")
+                if 'memory_delta' in metrics:
+                    print(f"  Memory Usage: {metrics['memory_delta']:.1f}MB")
+                    
+            # Show recent errors/warnings
+            if result_data.get('errors'):
+                print(f"\n{Colors.RED}Recent Errors:{Colors.RESET}")
+                for error in result_data['errors'][:5]:
+                    print(f"  • {error}")
+            
+            if result_data.get('warnings'):
+                print(f"\n{Colors.YELLOW}Recent Warnings:{Colors.RESET}")
+                for warning in result_data['warnings'][:5]:
+                    print(f"  • {warning}")
+                    
+        except Exception as e:
+            print(f"{Colors.RED}Analysis failed: {e}{Colors.RESET}")
+    
+    def _handle_build_status(self) -> None:
+        """Show comprehensive build and terminal status."""
+        if not self.advanced_building_agent:
+            print(f"{Colors.RED}Advanced building agent not available{Colors.RESET}")
+            return
+        
+        try:
+            status = self.advanced_building_agent.get_terminal_status()
+            
+            print(f"\n{Colors.CYAN}📊 Terminal & Build Status:{Colors.RESET}")
+            
+            # System status
+            system = status.get('system', {})
+            if 'error' not in system:
+                cpu = system.get('cpu_percent', 0)
+                memory = system.get('memory_percent', 0)
+                
+                cpu_color = Colors.RED if cpu > 80 else Colors.YELLOW if cpu > 60 else Colors.GREEN
+                memory_color = Colors.RED if memory > 80 else Colors.YELLOW if memory > 60 else Colors.GREEN
+                
+                print(f"\n{Colors.CYAN}System Resources:{Colors.RESET}")
+                print(f"  {cpu_color}CPU Usage: {cpu:.1f}%{Colors.RESET}")
+                print(f"  {memory_color}Memory Usage: {memory:.1f}%{Colors.RESET}")
+                print(f"  Active Processes: {system.get('active_processes', 'Unknown')}")
+                print(f"  Python Processes: {system.get('python_processes', 'Unknown')}")
+            
+            # AI Provider status
+            ai_status = status.get('ai_provider', {})
+            ai_color = Colors.GREEN if ai_status.get('configured') else Colors.YELLOW
+            print(f"\n{Colors.CYAN}AI Integration:{Colors.RESET}")
+            print(f"  {ai_color}Status: {'Configured' if ai_status.get('configured') else 'Not Configured'}{Colors.RESET}")
+            
+            if ai_status.get('configured'):
+                print(f"  Provider: {ai_status.get('provider', 'Unknown')}")
+                print(f"  Model: {ai_status.get('model', 'Unknown')}")
+            
+            # Generation history
+            gen_history = status.get('generation_history', {})
+            print(f"\n{Colors.CYAN}Build History:{Colors.RESET}")
+            print(f"  Total Builds: {gen_history.get('total_generations', 0)}")
+            print(f"  Successful: {gen_history.get('successful_generations', 0)}")
+            
+            # Workspace info
+            workspace = status.get('workspace', {})
+            workspace_color = Colors.GREEN if workspace.get('exists') else Colors.RED
+            print(f"\n{Colors.CYAN}Workspace:{Colors.RESET}")
+            print(f"  {workspace_color}Path: {workspace.get('path', 'Unknown')}{Colors.RESET}")
+            print(f"  Data Directory: {'Yes' if workspace.get('data_dir_exists') else 'No'}")
+            
+        except Exception as e:
+            print(f"{Colors.RED}Failed to get status: {e}{Colors.RESET}")
+    
+    def _handle_build_check_updates(self) -> None:
+        """Check for AI model updates and system health."""
+        if not self.advanced_building_agent:
+            print(f"{Colors.RED}Advanced building agent not available{Colors.RESET}")
+            return
+        
+        print(f"\n{Colors.CYAN}🔄 Checking for updates...{Colors.RESET}")
+        
+        try:
+            import asyncio
+            
+            async def check_updates():
+                return await self.advanced_building_agent.check_for_updates()
+            
+            results = asyncio.run(check_updates())
+            
+            print(f"\n{Colors.CYAN}Update Results:{Colors.RESET}")
+            
+            if results.get('models_updated'):
+                new_count = results.get('new_models_count', 0)
+                if new_count > 0:
+                    print(f"  {Colors.GREEN}✅ Found {new_count} new AI models{Colors.RESET}")
+                else:
+                    print(f"  {Colors.GREEN}✅ Model cache updated{Colors.RESET}")
+            else:
+                print(f"  {Colors.YELLOW}⚠️ No model updates available{Colors.RESET}")
+            
+            health_color = Colors.GREEN if results.get('system_healthy') else Colors.RED
+            health_status = "Healthy" if results.get('system_healthy') else "Issues Detected"
+            print(f"  {health_color}System Health: {health_status}{Colors.RESET}")
+            
+            recommendations = results.get('recommendations', [])
+            if recommendations:
+                print(f"\n{Colors.CYAN}Recommendations:{Colors.RESET}")
+                for rec in recommendations:
+                    print(f"  • {rec}")
+                    
+        except Exception as e:
+            print(f"{Colors.RED}Failed to check for updates: {e}{Colors.RESET}")
+    
+    def _handle_build_browse_models(self) -> None:
+        """Browse and explore available AI models with enhanced interface."""
+        if not self.enhanced_ai_provider:
+            print(f"{Colors.RED}Enhanced AI provider not available{Colors.RESET}")
+            return
+        
+        print(f"\n{Colors.CYAN}🔍 Browsing Available AI Models...{Colors.RESET}")
+        
+        try:
+            import asyncio
+            
+            async def browse_models():
+                # Update models cache first
+                print(f"{Colors.CYAN}📡 Fetching latest models from providers...{Colors.RESET}")
+                await self.enhanced_ai_provider.update_models_cache(force=True)
+                
+                # Start interactive model selection
+                selected_model = await self.enhanced_ai_provider.interactive_model_selection()
+                
+                if selected_model:
+                    print(f"\n{Colors.GREEN}🎯 Model Details:{Colors.RESET}")
+                    print(f"  Name: {selected_model.name}")
+                    print(f"  ID: {selected_model.id}")
+                    print(f"  Provider: {selected_model.provider.value}")
+                    
+                    cost_str = f"${selected_model.cost_per_1k_tokens:.6f}/1k tokens" if selected_model.cost_per_1k_tokens > 0 else "FREE"
+                    print(f"  Cost: {cost_str}")
+                    
+                    context_str = f"{selected_model.context_length:,}" if selected_model.context_length > 0 else "Unknown"
+                    print(f"  Context Length: {context_str} tokens")
+                    
+                    if selected_model.capabilities:
+                        print(f"  Capabilities: {', '.join(selected_model.capabilities)}")
+                    
+                    if selected_model.description:
+                        print(f"  Description: {selected_model.description}")
+                    
+                    # Ask if user wants to configure this model
+                    configure = input(f"\n{Colors.CYAN}Would you like to configure this model? (y/n): {Colors.RESET}").strip().lower()
+                    if configure == 'y':
+                        if selected_model.provider.value == 'openrouter':
+                            api_key = input(f"{Colors.CYAN}Enter your OpenRouter API key: {Colors.RESET}").strip()
+                            if api_key:
+                                # Configure the provider
+                                success = self.enhanced_ai_provider.configure_provider(
+                                    provider=selected_model.provider,
+                                    api_key=api_key,
+                                    model_id=selected_model.id
+                                )
+                                if success:
+                                    print(f"{Colors.GREEN}✅ Model configured successfully!{Colors.RESET}")
+                                else:
+                                    print(f"{Colors.RED}❌ Failed to configure model{Colors.RESET}")
+                        elif selected_model.provider.value == 'gemini':
+                            api_key = input(f"{Colors.CYAN}Enter your Google Gemini API key: {Colors.RESET}").strip()
+                            if api_key:
+                                success = self.enhanced_ai_provider.configure_provider(
+                                    provider=selected_model.provider,
+                                    api_key=api_key,
+                                    model_id=selected_model.id
+                                )
+                                if success:
+                                    print(f"{Colors.GREEN}✅ Model configured successfully!{Colors.RESET}")
+                                else:
+                                    print(f"{Colors.RED}❌ Failed to configure model{Colors.RESET}")
+                else:
+                    print(f"{Colors.YELLOW}No model selected{Colors.RESET}")
+            
+            asyncio.run(browse_models())
+            
+        except Exception as e:
+            print(f"{Colors.RED}Failed to browse models: {e}{Colors.RESET}")
+    
+    def _handle_clear_all_command(self) -> None:
+        """Comprehensive clear all command that clears everything."""
+        print(f"\n{Colors.CYAN}🧹 CLEARING ALL DATA - COMPREHENSIVE RESET{Colors.RESET}")
+        print(f"{Colors.YELLOW}This will clear all data across the entire system!{Colors.RESET}")
+        
+        confirm = input(f"\n{Colors.RED}Are you sure you want to proceed? Type 'yes' to confirm: {Colors.RESET}").strip().lower()
+        if confirm != 'yes':
+            print(f"{Colors.YELLOW}Clear all operation cancelled.{Colors.RESET}")
+            return
+        
+        print(f"\n{Colors.CYAN}Starting comprehensive clear operation...{Colors.RESET}")
+        cleared_items = []
+        failed_items = []
+        
+        # 1. Clear screen first
+        try:
+            os.system('cls' if os.name == 'nt' else 'clear')
+            cleared_items.append("🖥️ Screen")
+        except Exception as e:
+            failed_items.append(f"Screen: {e}")
+        
+        # 2. Clear all projects
+        try:
+            self.projects.clear()
+            self.current_project = None
+            cleared_items.append("🚀 Projects")
+        except Exception as e:
+            failed_items.append(f"Projects: {e}")
+        
+        # 3. Clear all tasks
+        try:
+            self.tasks.clear()
+            self._save_tasks()
+            cleared_items.append("✅ Tasks")
+        except Exception as e:
+            failed_items.append(f"Tasks: {e}")
+        
+        # 4. Clear all messages
+        try:
+            self.message_history.clear()
+            cleared_items.append("💬 Messages")
+        except Exception as e:
+            failed_items.append(f"Messages: {e}")
+        
+        # 5. Clear chat transcripts
+        try:
+            if hasattr(self, 'context_manager') and self.context_manager:
+                # Clear chat.jsonl
+                chat_file = self.data_dir / "messages" / "chat.jsonl"
+                if chat_file.exists():
+                    chat_file.unlink()
+            cleared_items.append("📝 Chat transcripts")
+        except Exception as e:
+            failed_items.append(f"Chat transcripts: {e}")
+        
+        # 6. Clear remembered entries
+        try:
+            data = {'history': [], 'last': None}
+            self._save_remembered(data)
+            cleared_items.append("🧠 Remembered entries")
+        except Exception as e:
+            failed_items.append(f"Remembered entries: {e}")
+        
+        # 7. Clear memory snapshots
+        try:
+            memory_dir = self.memory_dir
+            if memory_dir.exists():
+                for file in memory_dir.glob("*.jsonl"):
+                    file.unlink()
+                # Clear context memory
+                context_file = self.data_dir / "context_memory.json"
+                if context_file.exists():
+                    context_file.unlink()
+            cleared_items.append("📋 Memory snapshots")
+        except Exception as e:
+            failed_items.append(f"Memory snapshots: {e}")
+        
+        # 8. Clear all sessions
+        try:
+            self.sessions.clear()
+            self.current_session_id = None
+            sessions_dir = self.data_dir / "sessions"
+            if sessions_dir.exists():
+                for file in sessions_dir.glob("*.json"):
+                    file.unlink()
+            cleared_items.append("📏 Sessions")
+        except Exception as e:
+            failed_items.append(f"Sessions: {e}")
+        
+        # 9. Clear exported files
+        try:
+            exports_dir = self.exports_dir
+            if exports_dir.exists():
+                for file in exports_dir.glob("*"):
+                    if file.is_file():
+                        file.unlink()
+            cleared_items.append("📎 Exported files")
+        except Exception as e:
+            failed_items.append(f"Exported files: {e}")
+        
+        # 10. Clear state history
+        try:
+            self.state_history.clear()
+            cleared_items.append("🔄 State history")
+        except Exception as e:
+            failed_items.append(f"State history: {e}")
+        
+        # 11. Clear command history
+        try:
+            self.command_history.clear()
+            cleared_items.append("⚡ Command history")
+        except Exception as e:
+            failed_items.append(f"Command history: {e}")
+        
+        # 12. Clear AI configurations (if available)
+        try:
+            if hasattr(self, 'ai_manager') and self.ai_manager:
+                # Clear AI manager config
+                self.ai_manager.config = None
+            cleared_items.append("🤖 AI configurations")
+        except Exception as e:
+            failed_items.append(f"AI configurations: {e}")
+        
+        # 13. Clear building agent data
+        try:
+            if hasattr(self, 'advanced_building_agent') and self.advanced_building_agent:
+                self.advanced_building_agent.generation_history.clear()
+                self.advanced_building_agent._save_history()
+            cleared_items.append("🔨 Build history")
+        except Exception as e:
+            failed_items.append(f"Build history: {e}")
+        
+        # 14. Clear AI models cache
+        try:
+            if hasattr(self, 'enhanced_ai_provider') and self.enhanced_ai_provider:
+                self.enhanced_ai_provider.available_models.clear()
+                self.enhanced_ai_provider.last_model_check = None
+                cache_file = self.enhanced_ai_provider.models_cache_file
+                if cache_file.exists():
+                    cache_file.unlink()
+            cleared_items.append("🧠 AI models cache")
+        except Exception as e:
+            failed_items.append(f"AI models cache: {e}")
+        
+        # 15. Clear configuration files
+        try:
+            config_files = [
+                self.config_file,
+                self.state_file,
+                self.data_dir / ".project_context.json"
+            ]
+            for file in config_files:
+                if file.exists():
+                    file.unlink()
+            cleared_items.append("⚙️ Configuration files")
+        except Exception as e:
+            failed_items.append(f"Configuration files: {e}")
+        
+        # 16. Final save and reset
+        try:
+            self.save_persistent_data()
+            cleared_items.append("💾 Persistent data reset")
+        except Exception as e:
+            failed_items.append(f"Persistent data reset: {e}")
+        
+        # Display results
+        print(f"\n{Colors.CYAN}CLEAR ALL OPERATION COMPLETED{Colors.RESET}")
+        print(f"{Colors.GREEN}✅ Successfully cleared {len(cleared_items)} categories:{Colors.RESET}")
+        for item in cleared_items:
+            print(f"  ✅ {item}")
+        
+        if failed_items:
+            print(f"\n{Colors.RED}❌ Failed to clear {len(failed_items)} categories:{Colors.RESET}")
+            for item in failed_items:
+                print(f"  ❌ {item}")
+        
+        print(f"\n{Colors.GREEN}✨ System has been completely reset! All data cleared.{Colors.RESET}")
+        print(f"{Colors.CYAN}You can now start fresh with a clean workspace.{Colors.RESET}")
+        
+        # Display header again
+        self.display_header()
+    
+    def _handle_clear_command(self, args: List[str]) -> None:
+        """Handle clear command with optional 'all' parameter."""
+        if args and args[0].lower() == 'all':
+            self._handle_clear_all_command()
+        else:
+            os.system('cls' if os.name == 'nt' else 'clear')
+            self.display_header()
+    
+    def _handle_build_clear_history(self) -> None:
+        """Clear build generation history."""
+        try:
+            if self.advanced_building_agent:
+                # Clear generation history
+                self.advanced_building_agent.generation_history.clear()
+                self.advanced_building_agent._save_history()
+                print(f"{Colors.GREEN}✅ Build history cleared{Colors.RESET}")
+            else:
+                print(f"{Colors.YELLOW}⚠️ Advanced building agent not available{Colors.RESET}")
+        except Exception as e:
+            print(f"{Colors.RED}❌ Failed to clear build history: {e}{Colors.RESET}")
+    
+    def _handle_build_clear_cache(self) -> None:
+        """Clear AI models cache."""
+        try:
+            if self.enhanced_ai_provider:
+                # Clear models cache
+                self.enhanced_ai_provider.available_models.clear()
+                self.enhanced_ai_provider.last_model_check = None
+                
+                # Clear cache files
+                cache_file = self.enhanced_ai_provider.models_cache_file
+                if cache_file.exists():
+                    cache_file.unlink()
+                
+                print(f"{Colors.GREEN}✅ AI models cache cleared{Colors.RESET}")
+            else:
+                print(f"{Colors.YELLOW}⚠️ Enhanced AI provider not available{Colors.RESET}")
+        except Exception as e:
+            print(f"{Colors.RED}❌ Failed to clear models cache: {e}{Colors.RESET}")
+    
+    def _handle_build_clear_configs(self) -> None:
+        """Clear AI provider configurations."""
+        try:
+            if self.enhanced_ai_provider:
+                # Clear configuration
+                self.enhanced_ai_provider.config = None
+                
+                # Clear config file
+                config_file = self.enhanced_ai_provider.config_file
+                if config_file.exists():
+                    config_file.unlink()
+                
+                print(f"{Colors.GREEN}✅ AI provider configurations cleared{Colors.RESET}")
+            else:
+                print(f"{Colors.YELLOW}⚠️ Enhanced AI provider not available{Colors.RESET}")
+        except Exception as e:
+            print(f"{Colors.RED}❌ Failed to clear AI configurations: {e}{Colors.RESET}")
+    
+    def _handle_build_clear_all(self) -> None:
+        """Clear all building agent data."""
+        print(f"{Colors.CYAN}🧹 Clearing all building agent data...{Colors.RESET}")
+        
+        # Clear build history
+        try:
+            self._handle_build_clear_history()
+        except Exception as e:
+            print(f"{Colors.RED}Error clearing history: {e}{Colors.RESET}")
+        
+        # Clear models cache
+        try:
+            self._handle_build_clear_cache()
+        except Exception as e:
+            print(f"{Colors.RED}Error clearing cache: {e}{Colors.RESET}")
+        
+        # Clear AI configurations
+        try:
+            self._handle_build_clear_configs()
+        except Exception as e:
+            print(f"{Colors.RED}Error clearing configs: {e}{Colors.RESET}")
+        
+        print(f"{Colors.GREEN}✨ All building agent data cleared successfully!{Colors.RESET}")
 
 def main():
     """Main entry point for the robust terminal interface."""
