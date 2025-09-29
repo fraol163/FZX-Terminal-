@@ -28,9 +28,9 @@
 - [🚀 Deployment & Operations](#deployment--operations)
 - [📊 Monitoring & Analytics](#monitoring--analytics)
 - [🔧 Troubleshooting](#troubleshooting)
-- [🤝 Contributing & Support](#contributing--support)
-- [🏢 Enterprise Information](#enterprise-information)
 - [📄 License & Legal](#license--legal)
+- [📡 Contact Information](#contact-information)
+- [🎉 Thank You!](#thank-you)
 
 ---
 
@@ -146,8 +146,12 @@ git clone https://github.com/fraol163/FZX-Terminal-.git
 cd FZX-Terminal-
 python test_imports.py  # ✅ Should show: "All modules imported successfully!"
 
-# 2. Install AI dependencies (optional but recommended)
-pip install aiohttp requests psutil
+# 2. Install dependencies (choose one option)
+# Option A: Install all dependencies
+pip install -r requirements.txt
+
+# Option B: Install only core dependencies (minimal setup)
+pip install aiohttp psutil
 
 # 3. Launch terminal
 python terminal_interface.py
@@ -484,8 +488,8 @@ cd FZX-Terminal-
 # 2. Verify Python version
 python --version  # Should be 3.8+
 
-# 3. Install dependencies (optional but recommended)
-pip install aiohttp requests psutil
+# 3. Install dependencies
+pip install -r requirements.txt
 
 # 4. Validate installation
 python test_imports.py
@@ -502,7 +506,7 @@ FROM python:3.10-slim
 
 WORKDIR /app
 COPY . .
-RUN pip install aiohttp requests psutil
+RUN pip install -r requirements.txt
 
 CMD ["python", "terminal_interface.py"]
 ```
