@@ -29,8 +29,8 @@
 - [📊 Monitoring & Analytics](#monitoring--analytics)
 - [🔧 Troubleshooting](#troubleshooting)
 - [📄 License & Legal](#license--legal)
-- [📡 Contact Information](#contact-information)
-- [🎉 Thank You!](#thank-you)
+- [📡 Contact Information](#-contact-information)
+- [🎉 Thank You!](#-thank-you)
 
 ---
 
