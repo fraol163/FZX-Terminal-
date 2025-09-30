@@ -545,6 +545,10 @@ class AdvancedBuildingAgent:
         finally:
             self.monitor.stop_monitoring()
     
+    async def parse_description(self, description: str, project_name: str = None) -> UserRequirements:
+        """Public method to parse project description into requirements."""
+        return await self._parse_requirements(description, project_name)
+    
     async def _parse_requirements(self, description: str, project_name: str = None) -> UserRequirements:
         """Parse natural language description into structured requirements."""
         

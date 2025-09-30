@@ -1376,6 +1376,10 @@ class RobustTerminalInterface:
         except Exception as e:
             self.log_message(f"Session save error: {e}", "error")
     
+    def run_command(self, command: str) -> None:
+        """Execute shell commands (alias for handle_run_command)."""
+        self.handle_run_command(command)
+    
     def handle_run_command(self, command: str) -> None:
         """Execute shell commands with enhanced output handling."""
         if not command.strip():
@@ -2570,6 +2574,10 @@ class RobustTerminalInterface:
             if last_text:
                 prev = (last_text[:80] + ('…' if len(last_text) > 80 else ''))
                 print(f"Last: {prev}")
+    
+    def start(self) -> None:
+        """Start the terminal interface (alias for run)."""
+        self.run()
     
     def run(self) -> None:
         """Main interactive loop with enhanced error handling."""

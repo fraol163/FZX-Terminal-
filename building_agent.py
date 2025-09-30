@@ -204,6 +204,11 @@ class BuildingAgent:
         # Default to web project
         return BuildType.WEB, Framework.REACT, detection_info
     
+    def create_project(self, config: BuildConfig) -> Dict[str, Any]:
+        """Create a project (synchronous wrapper for build_project)."""
+        import asyncio
+        return asyncio.run(self.build_project(config))
+    
     async def build_project(self, config: BuildConfig) -> Dict[str, Any]:
         """Main build orchestration method."""
         result = {

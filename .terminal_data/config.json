@@ -1,0 +1,38 @@
+{
+  "version": "1.0.0",
+  "ai_providers": {
+    "openrouter": {
+      "api_key": "",
+      "models_cache_ttl": 86400,
+      "retry_attempts": 3,
+      "rate_limit_delay": 1
+    },
+    "gemini": {
+      "api_key": "",
+      "model_version": "latest"
+    }
+  },
+  "system": {
+    "log_level": "INFO",
+    "auto_save": true,
+    "performance_mode": "balanced",
+    "max_workers": 4,
+    "cache_size_mb": 100
+  },
+  "security": {
+    "encryption_enabled": true,
+    "audit_logging": true,
+    "session_timeout": 3600
+  },
+  "ui": {
+    "color_theme": "default",
+    "show_timestamps": true,
+    "compact_mode": false
+  },
+  "building": {
+    "default_language": "python",
+    "auto_analyze": true,
+    "generate_docs": true,
+    "code_quality_threshold": 80
+  }
+}
