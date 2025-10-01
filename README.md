@@ -325,7 +325,7 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 
 ### Development Setup
 ```bash
-git clone https://github.com/YOUR-USERNAME/FZX-Terminal-.git
+git clone https://github.com/fraol163/FZX-Terminal-.git
 cd FZX-Terminal-
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
