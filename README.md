@@ -341,7 +341,7 @@ python terminal_interface.py  # Launch FZX-Terminal
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT License 
 
 ## Support
 
