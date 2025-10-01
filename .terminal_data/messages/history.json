@@ -1,11 +1,20 @@
 [
   {
-    "id": "msg_d8927a60",
-    "content": "Command executed: exit",
-    "timestamp": "2025-09-29T18:00:15.302953",
+    "id": "msg_a7b7604f",
+    "content": "Command executed: pwd",
+    "timestamp": "2025-09-30T11:24:04.462841",
     "message_type": "command",
-    "project_id": "proj_a84c3753",
-    "session_id": "session_514e5e81_1759145607",
+    "project_id": null,
+    "session_id": null,
+    "metadata": {}
+  },
+  {
+    "id": "msg_130eb40a",
+    "content": "Command executed: clear",
+    "timestamp": "2025-09-30T11:24:17.098535",
+    "message_type": "command",
+    "project_id": null,
+    "session_id": null,
     "metadata": {}
   }
 ]

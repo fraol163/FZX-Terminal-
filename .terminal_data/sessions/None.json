@@ -1,11 +1,17 @@
 {
   "session_id": null,
-  "timestamp": "2025-09-29T17:25:14.786500",
+  "timestamp": "2025-09-30T11:24:17.102230",
   "current_project": null,
-  "command_history": [],
+  "command_history": [
+    {
+      "command": "pwd",
+      "timestamp": "2025-09-30T11:24:04.466972",
+      "session_id": null
+    }
+  ],
   "working_directory": "C:\\Users\\fraol\\Desktop\\FZX-Terminal-",
   "settings": {
-    "theme": "default",
+    "theme": "matrix",
     "show_timestamps": true,
     "auto_save": false
   }

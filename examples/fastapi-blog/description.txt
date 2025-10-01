@@ -1,0 +1,1 @@
+Build a FastAPI server for a simple blog with user authentication, post creation, and basic CRUD operations.

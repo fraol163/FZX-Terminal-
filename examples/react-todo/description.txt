@@ -1,0 +1,2 @@
+Create a React todo app with add, delete, and mark complete functionality. 
+Use modern React hooks. Add dark mode toggle. Make it mobile responsive.
