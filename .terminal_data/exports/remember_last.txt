@@ -1,0 +1,7 @@
+# FZX-Terminal Remembered Instructions
+# This file contains the last remembered instruction for quick execution
+# Use 'remember' command to save instructions
+# Use 'perform' command to execute the last remembered instruction
+
+# Example:
+# Create a Python function to calculate fibonacci numbers

@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "project_name": "FZX-Terminal",
+  "last_accessed": "",
+  "sessions": [],
+  "config": {
+    "ai_enabled": true,
+    "context_preservation": true,
+    "auto_save": true
+  },
+  "state": {
+    "current_session": null,
+    "active_tasks": [],
+    "completed_tasks": [],
+    "notes": []
+  }
+}
