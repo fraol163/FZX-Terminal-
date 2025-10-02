@@ -305,7 +305,7 @@ class BuildingAgent:
         return files_created
     
     def _create_web_project(self, config: BuildConfig, output_path: Path) -> List[str]:
-        """Create basic web project structure."""
+        """Create basic web project structure with AI-generated content."""
         files = [
             "package.json",
             "index.html",
@@ -317,15 +317,24 @@ class BuildingAgent:
             ".gitignore"
         ]
         
+        # Create directories first
         for file_path in files:
             full_path = output_path / file_path
             full_path.parent.mkdir(parents=True, exist_ok=True)
-            full_path.touch()
+        
+        # Generate content for key files using AI if available
+        if self.ai_manager and self.ai_manager.is_configured():
+            self._generate_web_project_content_with_ai(config, output_path, files)
+        else:
+            # Fallback to basic file creation
+            for file_path in files:
+                full_path = output_path / file_path
+                full_path.touch()
         
         return files
     
     def _create_api_project(self, config: BuildConfig, output_path: Path) -> List[str]:
-        """Create basic API project structure."""
+        """Create basic API project structure with AI-generated content."""
         files = [
             "package.json",
             "server.js",
@@ -339,15 +348,24 @@ class BuildingAgent:
             ".gitignore"
         ]
         
+        # Create directories first
         for file_path in files:
             full_path = output_path / file_path
             full_path.parent.mkdir(parents=True, exist_ok=True)
-            full_path.touch()
+        
+        # Generate content for key files using AI if available
+        if self.ai_manager and self.ai_manager.is_configured():
+            self._generate_api_project_content_with_ai(config, output_path, files)
+        else:
+            # Fallback to basic file creation
+            for file_path in files:
+                full_path = output_path / file_path
+                full_path.touch()
         
         return files
     
     def _create_cli_project(self, config: BuildConfig, output_path: Path) -> List[str]:
-        """Create basic CLI project structure."""
+        """Create basic CLI project structure with AI-generated content."""
         files = [
             "package.json",
             "bin/cli.js",
@@ -358,12 +376,213 @@ class BuildingAgent:
             ".gitignore"
         ]
         
+        # Create directories first
         for file_path in files:
             full_path = output_path / file_path
             full_path.parent.mkdir(parents=True, exist_ok=True)
-            full_path.touch()
+        
+        # Generate content for key files using AI if available
+        if self.ai_manager and self.ai_manager.is_configured():
+            self._generate_cli_project_content_with_ai(config, output_path, files)
+        else:
+            # Fallback to basic file creation
+            for file_path in files:
+                full_path = output_path / file_path
+                full_path.touch()
         
         return files
+    
+    def _generate_api_project_content_with_ai(self, config: BuildConfig, output_path: Path, files: List[str]) -> None:
+        """Generate API project content using AI."""
+        try:
+            # Create a prompt for generating project content
+            framework_name = config.framework.value if config.framework else "Node.js with Express"
+            prompt = f"""
+            Generate complete, functional code for a {config.build_type.value} project named '{config.name}' using {framework_name}.
+            
+            Project Requirements:
+            - Project Name: {config.name}
+            - Framework: {framework_name}
+            - Features: {', '.join(config.features) if config.features else 'Standard API features'}
+            
+            Please provide complete, runnable code for the following files:
+            
+            1. package.json - With appropriate dependencies
+            2. server.js - Main server entry point
+            3. routes/index.js - Basic routes
+            4. models/user.js - User model example
+            5. middleware/auth.js - Authentication middleware
+            6. config/database.js - Database configuration
+            7. tests/api.test.js - Basic API tests
+            8. README.md - Project documentation
+            9. .env.example - Environment variables example
+            10. .gitignore - Standard git ignore patterns
+            
+            Format your response as a JSON object with file paths as keys and file contents as values.
+            Example format: {{"package.json": "...content...", "server.js": "...content..."}}
+            
+            Make sure the code is modern, follows best practices, and is fully functional.
+            """
+            
+            import asyncio
+            async def generate_content():
+                response = await self.ai_manager.chat(prompt, use_context=False)
+                return response
+            
+            # Run the async function
+            try:
+                response = asyncio.run(generate_content())
+                if response.success:
+                    # Parse AI response to extract file contents
+                    import json
+                    import re
+                    
+                    # Try to extract JSON from response
+                    content = response.content
+                    json_match = re.search(r'\{.*\}', content, re.DOTALL)
+                    
+                    if json_match:
+                        try:
+                            file_contents = json.loads(json_match.group())
+                            
+                            # Create files with AI-generated content
+                            for file_path, file_content in file_contents.items():
+                                full_path = output_path / file_path
+                                full_path.parent.mkdir(parents=True, exist_ok=True)
+                                with open(full_path, 'w', encoding='utf-8') as f:
+                                    f.write(file_content)
+                            
+                            # Create any remaining files that weren't in the AI response
+                            for file_path in files:
+                                full_path = output_path / file_path
+                                if not full_path.exists():
+                                    full_path.parent.mkdir(parents=True, exist_ok=True)
+                                    full_path.touch()
+                        except json.JSONDecodeError:
+                            # Fallback to empty files if JSON parsing fails
+                            print(f"⚠️ AI response parsing failed, creating empty files")
+                            for file_path in files:
+                                full_path = output_path / file_path
+                                full_path.parent.mkdir(parents=True, exist_ok=True)
+                                full_path.touch()
+                    else:
+                        # Fallback to empty files if no JSON found
+                        print(f"⚠️ No JSON found in AI response, creating empty files")
+                        for file_path in files:
+                            full_path = output_path / file_path
+                            full_path.parent.mkdir(parents=True, exist_ok=True)
+                            full_path.touch()
+                else:
+                    # Fallback to empty files if AI fails
+                    print(f"⚠️ AI generation failed: {response.error}, creating empty files")
+                    for file_path in files:
+                        full_path = output_path / file_path
+                        full_path.parent.mkdir(parents=True, exist_ok=True)
+                        full_path.touch()
+            except Exception:
+                # Fallback to empty files if AI fails
+                for file_path in files:
+                        full_path = output_path / file_path
+                        full_path.parent.mkdir(parents=True, exist_ok=True)
+                        full_path.touch()
+        except Exception:
+            # Final fallback to empty files
+            for file_path in files:
+                full_path = output_path / file_path
+                full_path.parent.mkdir(parents=True, exist_ok=True)
+                full_path.touch()
+    
+    def _generate_cli_project_content_with_ai(self, config: BuildConfig, output_path: Path, files: List[str]) -> None:
+        """Generate CLI project content using AI."""
+        try:
+            # Create a prompt for generating project content
+            prompt = f"""
+            Generate complete, functional code for a {config.build_type.value} project named '{config.name}'.
+            
+            Project Requirements:
+            - Project Name: {config.name}
+            - Features: {', '.join(config.features) if config.features else 'Standard CLI features'}
+            
+            Please provide complete, runnable code for the following files:
+            
+            1. package.json - With appropriate dependencies
+            2. bin/cli.js - Main CLI entry point
+            3. lib/index.js - Main library code
+            4. lib/commands/help.js - Help command
+            5. tests/cli.test.js - Basic CLI tests
+            6. README.md - Project documentation
+            7. .gitignore - Standard git ignore patterns
+            
+            Format your response as a JSON object with file paths as keys and file contents as values.
+            Example format: {{"package.json": "...content...", "bin/cli.js": "...content..."}}
+            
+            Make sure the code is modern, follows best practices, and is fully functional.
+            """
+            
+            import asyncio
+            async def generate_content():
+                response = await self.ai_manager.chat(prompt, use_context=False)
+                return response
+            
+            # Run the async function
+            try:
+                response = asyncio.run(generate_content())
+                if response.success:
+                    # Parse AI response to extract file contents
+                    import json
+                    import re
+                    
+                    # Try to extract JSON from response
+                    content = response.content
+                    json_match = re.search(r'\{.*\}', content, re.DOTALL)
+                    
+                    if json_match:
+                        try:
+                            file_contents = json.loads(json_match.group())
+                            
+                            # Create files with AI-generated content
+                            for file_path, file_content in file_contents.items():
+                                full_path = output_path / file_path
+                                full_path.parent.mkdir(parents=True, exist_ok=True)
+                                with open(full_path, 'w', encoding='utf-8') as f:
+                                    f.write(file_content)
+                            
+                            # Create any remaining files that weren't in the AI response
+                            for file_path in files:
+                                full_path = output_path / file_path
+                                if not full_path.exists():
+                                    full_path.parent.mkdir(parents=True, exist_ok=True)
+                                    full_path.touch()
+                        except json.JSONDecodeError:
+                            # Fallback to empty files if JSON parsing fails
+                            for file_path in files:
+                                full_path = output_path / file_path
+                                full_path.parent.mkdir(parents=True, exist_ok=True)
+                                full_path.touch()
+                    else:
+                        # Fallback to empty files if no JSON found
+                        for file_path in files:
+                            full_path = output_path / file_path
+                            full_path.parent.mkdir(parents=True, exist_ok=True)
+                            full_path.touch()
+                else:
+                    # Fallback to empty files if AI fails
+                    for file_path in files:
+                        full_path = output_path / file_path
+                        full_path.parent.mkdir(parents=True, exist_ok=True)
+                        full_path.touch()
+            except Exception:
+                # Fallback to empty files if AI fails
+                for file_path in files:
+                        full_path = output_path / file_path
+                        full_path.parent.mkdir(parents=True, exist_ok=True)
+                        full_path.touch()
+        except Exception:
+            # Final fallback to empty files
+            for file_path in files:
+                full_path = output_path / file_path
+                full_path.parent.mkdir(parents=True, exist_ok=True)
+                full_path.touch()
     
     async def _ai_enhance_project(self, config: BuildConfig, output_path: Path) -> None:
         """Use AI to enhance generated project."""
@@ -378,6 +597,110 @@ class BuildingAgent:
         except Exception:
             # AI enhancement is optional
             pass
+    
+    def _generate_web_project_content_with_ai(self, config: BuildConfig, output_path: Path, files: List[str]) -> None:
+        """Generate web project content using AI."""
+        print(f"🚀 _generate_web_project_content_with_ai called with {len(files)} files")
+        try:
+            # Create a prompt for generating project content
+            framework_name = config.framework.value if config.framework else "modern web technologies"
+            prompt = f"""
+            Generate complete, functional code for a {config.build_type.value} project named '{config.name}' using {framework_name}.
+            
+            Project Requirements:
+            - Project Name: {config.name}
+            - Framework: {framework_name}
+            - Features: {', '.join(config.features) if config.features else 'Standard features'}
+            
+            Please provide complete, runnable code for the following files:
+            
+            1. package.json - With appropriate dependencies
+            2. index.html - Basic HTML structure
+            3. src/main.js - Main JavaScript entry point
+            4. src/App.js - Main application component
+            5. src/components/Header.js - Header component
+            6. README.md - Project documentation
+            7. .gitignore - Standard git ignore patterns
+            
+            Format your response as a JSON object with file paths as keys and file contents as values.
+            Example format: {{"package.json": "...content...", "index.html": "...content..."}}
+            
+            Make sure the code is modern, follows best practices, and is fully functional.
+            """
+            
+            import asyncio
+            async def generate_content():
+                response = await self.ai_manager.chat(prompt, use_context=False)
+                return response
+            
+            # Run the async function
+            try:
+                response = asyncio.run(generate_content())
+                print(f"🤖 AI response received, success: {response.success}")
+                if response.success:
+                    # Parse AI response to extract file contents
+                    import json
+                    import re
+                    
+                    # Try to extract JSON from response
+                    content = response.content
+                    json_match = re.search(r'\{.*\}', content, re.DOTALL)
+                    
+                    if json_match:
+                        try:
+                            file_contents = json.loads(json_match.group())
+                            print(f"✅ Parsed AI response with {len(file_contents)} files")
+                            
+                            # Create files with AI-generated content
+                            for file_path, file_content in file_contents.items():
+                                full_path = output_path / file_path
+                                full_path.parent.mkdir(parents=True, exist_ok=True)
+                                with open(full_path, 'w', encoding='utf-8') as f:
+                                    f.write(file_content)
+                                print(f"   📄 Created {file_path} ({len(file_content)} chars)")
+                            
+                            # Create any remaining files that weren't in the AI response
+                            for file_path in files:
+                                full_path = output_path / file_path
+                                if not full_path.exists():
+                                    full_path.parent.mkdir(parents=True, exist_ok=True)
+                                    full_path.touch()
+                                    print(f"   📄 Created empty {file_path}")
+                        except json.JSONDecodeError:
+                            # Fallback to empty files if JSON parsing fails
+                            print(f"⚠️ AI response parsing failed, creating empty files")
+                            for file_path in files:
+                                full_path = output_path / file_path
+                                full_path.parent.mkdir(parents=True, exist_ok=True)
+                                full_path.touch()
+                    else:
+                        # Fallback to empty files if no JSON found
+                        print(f"⚠️ No JSON found in AI response, creating empty files")
+                        for file_path in files:
+                            full_path = output_path / file_path
+                            full_path.parent.mkdir(parents=True, exist_ok=True)
+                            full_path.touch()
+                else:
+                    # Fallback to empty files if AI fails
+                    print(f"⚠️ AI generation failed: {response.error}, creating empty files")
+                    for file_path in files:
+                        full_path = output_path / file_path
+                        full_path.parent.mkdir(parents=True, exist_ok=True)
+                        full_path.touch()
+            except Exception as e:
+                # Fallback to empty files if AI fails
+                print(f"⚠️ AI generation exception: {e}, creating empty files")
+                for file_path in files:
+                        full_path = output_path / file_path
+                        full_path.parent.mkdir(parents=True, exist_ok=True)
+                        full_path.touch()
+        except Exception as e:
+            # Final fallback to empty files
+            print(f"⚠️ AI generation failed with exception: {e}, creating empty files")
+            for file_path in files:
+                full_path = output_path / file_path
+                full_path.parent.mkdir(parents=True, exist_ok=True)
+                full_path.touch()
     
     async def _setup_development_environment(self, config: BuildConfig, output_path: Path) -> None:
         """Set up development environment."""

@@ -1,17 +1,8 @@
 [
   {
-    "id": "msg_a7b7604f",
-    "content": "Command executed: pwd",
-    "timestamp": "2025-09-30T11:24:04.462841",
-    "message_type": "command",
-    "project_id": null,
-    "session_id": null,
-    "metadata": {}
-  },
-  {
-    "id": "msg_130eb40a",
-    "content": "Command executed: clear",
-    "timestamp": "2025-09-30T11:24:17.098535",
+    "id": "msg_da27850e",
+    "content": "Command executed: exit",
+    "timestamp": "2025-10-02T21:56:48.094460",
     "message_type": "command",
     "project_id": null,
     "session_id": null,

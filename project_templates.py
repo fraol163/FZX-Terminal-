@@ -1014,23 +1014,43 @@ next-env.d.ts"""
     
     def _get_template_key(self, config: TemplateConfig) -> str:
         """Get template key based on configuration."""
-        if config.framework:
-            return f"{config.framework}-{config.build_type}"
+        build_type = config.build_type
+        if hasattr(build_type, 'value'):
+            build_type = build_type.value
+            
+        framework = config.framework
+        if hasattr(framework, 'value'):
+            framework = framework.value
+            
+        if framework:
+            return f"{framework}-{build_type}"
         else:
-            return f"basic-{config.build_type}"
+            return f"basic-{build_type}"
     
     def _replace_placeholders(self, text: str, config: TemplateConfig) -> str:
         """Replace template placeholders with actual values."""
+        # Convert enums to their string values
+        project_name = config.name
+        build_type = config.build_type
+        if hasattr(build_type, 'value'):
+            build_type = build_type.value
+            
+        framework = config.framework
+        if hasattr(framework, 'value'):
+            framework = framework.value
+            
+        language = config.language
+        
         replacements = {
-            '{{project_name}}': config.name,
-            '{{build_type}}': config.build_type,
-            '{{framework}}': config.framework or 'default',
-            '{{language}}': config.language
+            '{{project_name}}': project_name,
+            '{{build_type}}': build_type,
+            '{{framework}}': framework or 'default',
+            '{{language}}': language
         }
         
         result = text
         for placeholder, value in replacements.items():
-            result = result.replace(placeholder, value)
+            result = result.replace(placeholder, str(value))
         
         return result
     

@@ -4,20 +4,20 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)](https://github.com/your-repo)
 
-Generate software projects from natural language using 330+ AI models.
+Advanced AI-powered terminal interface with codebase understanding capabilities.
 
-FZX-Terminal is a command-line tool that converts project descriptions into working code. It integrates with OpenRouter (326+ models) and Google Gemini to provide access to both free and paid AI models for code generation.
+FZX-Terminal is a command-line tool that provides intelligent AI assistance with the ability to read and understand your project files. The AI can analyze your codebase to provide contextual responses, though conversation history preservation is limited.
 
 ## Features
 
-- Generate projects from natural language descriptions
-- Access to 330+ AI models (57 free models available)
-- Interactive model browser with cost and capability information
-- Support for multiple programming languages and frameworks
-- Real-time code analysis and quality assessment
-- Built-in project templates for common use cases
-- Session management and build history tracking
-- Cross-platform support (Windows, macOS, Linux)
+- **Codebase Understanding**: AI can read and analyze project files for contextual responses
+- **Limited Conversation Memory**: Basic conversation history tracking
+- **Multi-Provider Support**: Google Gemini and OpenRouter integration
+- **Latest AI Models**: Access to Gemini 2.0 Flash Experimental and other cutting-edge models
+- **Enhanced Response Design**: Cool borders and formatting for all AI responses
+- **Secure API Key Management**: Safe storage and management of API keys
+- **Real-time Validation**: API key validation during setup
+- **Cross-platform Support**: Works on Windows, macOS, and Linux
 
 ## Installation
 
@@ -55,7 +55,7 @@ python test_imports.py
 Expected output:
 ```
 FZX-Terminal Installation Check
-========================================
+======================================== 
 Testing module imports...
 ✅ aiohttp
 ✅ psutil
@@ -76,131 +76,110 @@ Testing FZX-Terminal modules...
 
 1. **Setup AI Provider** (one-time):
    ```bash
-   build setup-ai openrouter
+   ai config setup
    ```
    
-2. **Generate a Project**:
+2. **Chat with AI**:
    ```bash
-   build describe 'Create a React todo app with dark mode'
+   ai chat 'Explain how to create a Python virtual environment'
    ```
 
-3. **Browse Available Models**:
+3. **Manage API Keys**:
    ```bash
-   build browse-models
+   ai config add-key
+   ai config edit-key
+   ai config delete-key
    ```
 
-### Core Commands
+### AI Commands
 
-#### Project Generation
+#### AI Configuration
 ```bash
-# Natural language generation
-build describe 'Create a FastAPI server with JWT authentication'
-build describe 'Build a React dashboard with charts and dark mode'
-build describe 'Make a Python CLI tool for file management'
-
-# Template-based generation
-build web my-app --framework react
-build api my-server --framework fastapi
-build cli my-tool --language python
+ai config setup     # Interactive setup with latest Gemini models and validation
+ai config show      # Show current configuration with masked API key
+ai config test      # Test AI connection with current model
 ```
 
-#### AI Provider Management
+#### API Key Management
 ```bash
-build setup-ai openrouter    # Setup OpenRouter (326+ models)
-build setup-ai gemini        # Setup Google Gemini (4 models)
-build ai-status              # Show current AI configuration
-build browse-models          # Interactive model browser
+ai config add-key   # Add or replace API key with real-time validation
+ai config edit-key  # Edit current API key with validation
+ai config delete-key # Remove API key and configuration completely
 ```
 
-#### Analysis and Monitoring
+#### AI Chat
 ```bash
-build analyze                # Analyze generated code quality
-build status                 # System and build status
-build history                # View build history
+# Chat with AI using project context
+ai chat 'Explain how to implement authentication in Python'
+
+# Codebase-aware queries
+ai chat 'How does the context manager work in this project?'
+ai chat 'Explain the chat manager implementation'
+ai chat 'What are the key components of the AI service?'
 ```
-
-## Examples
-
-### React Todo App
-
-**Command:**
-```bash
-build describe 'Create a React todo app with add, delete, and mark complete functionality. Use modern React hooks. Add dark mode toggle. Make it mobile responsive.'
-```
-
-**Generated files:**
-- `src/App.jsx` - Main application component
-- `src/components/TodoList.jsx` - Todo list component  
-- `src/components/TodoItem.jsx` - Individual todo item
-- `src/components/AddTodo.jsx` - Add todo form
-- `src/styles/App.css` - Responsive CSS with dark mode
-- `package.json` - Project dependencies
-
-**Features automatically included:**
-- Local storage persistence
-- Mobile-responsive design
-- Dark mode toggle
-- Modern React hooks (useState, useEffect)
-
-See complete example: [examples/react-todo/](examples/react-todo/)
-
-### FastAPI Blog Server
-
-**Command:**
-```bash
-build describe 'Build a FastAPI server for a simple blog with user authentication, post creation, and basic CRUD operations'
-```
-
-**Generated components:**
-- User registration and login endpoints
-- JWT token authentication
-- Post CRUD operations
-- Automatic API documentation
-- Password hashing
-- Request validation
-
-See complete example: [examples/fastapi-blog/](examples/fastapi-blog/)
-
-### Python CLI Tool
-
-**Command:**
-```bash
-build describe 'Create a Python CLI tool for file management with colors and progress bars'
-```
-
-**Generated features:**
-- Argument parsing with argparse
-- Colored terminal output
-- Progress bars for operations
-- File operations (copy, move, delete)
-- Error handling
-
-See complete example: [examples/cli-file-manager/](examples/cli-file-manager/)
 
 ## AI Models
 
-### Free Models (0 cost)
-FZX-Terminal provides access to 57 free models:
+### Latest Gemini Models
+- **Gemini 2.0 Flash Experimental** - Latest experimental model with enhanced capabilities
+- **Gemini 1.5 Pro Latest** - Most capable model for complex tasks
+- **Gemini 1.5 Flash Latest** - Fast and efficient model
+- **Gemini 1.5 Flash 8B Latest** - Lightweight and fast model
 
-- **DeepSeek-Coder-V2**: Best free coding model
-- **Gemini 2.0 Flash**: 1M context, good for large projects
-- **Qwen3-Coder**: Strong Python generation
-- **CodeLlama-70B**: Good for basic applications
+### OpenRouter Models
+Access to 300+ models including:
+- **Free Models**: DeepSeek-Coder-V2, Qwen3-Coder, CodeLlama-70B
+- **Premium Models**: GPT-4, Claude-3, and more
 
-### Model Selection Guide
+## Enhanced User Experience
 
-| Task | Free Option | Paid Option | Cost (typical project) |
-|------|-------------|-------------|------------------------|
-| React apps | DeepSeek-Coder-V2 | GPT-4 | $0.02 - $0.05 |
-| Python APIs | Qwen3-Coder | Claude-3-Sonnet | $0.01 - $0.03 |
-| CLI tools | CodeLlama-70B | GPT-4-Turbo | $0.02 - $0.04 |
-| Documentation | Gemini-2.0-Flash | Claude-3-Opus | $0.01 - $0.02 |
+### Cool Design for All AI Responses
+All AI responses feature a consistent, professional design with:
+- Colorful borders for better visual separation
+- Proper alignment and spacing
+- Metadata display (model, response time, tokens)
+- Consistent formatting across all commands
 
-**Daily Limits (Free Tier):**
-- OpenRouter: 200 requests, 200k tokens
-- Gemini: 1,500 requests, higher token limit
+### Codebase Understanding
+FZX-Terminal's AI can read and understand your project files:
+- **Code Analysis**: AI can examine your code for contextual responses
+- **File Referencing**: Ask about specific components and get relevant information
+- **Implementation Details**: Get explanations of how different parts work
 
-For detailed model information, see [docs/MODELS.md](docs/MODELS.md)
+Example queries:
+```bash
+ai chat 'How does the context manager work in this project?'
+# AI reads the context_manager.py file and explains its implementation
+
+ai chat 'Explain the chat manager implementation'
+# AI examines chat_manager.py and provides details
+
+ai chat 'What are the key components of the AI service?'
+# AI analyzes ai_service.py and describes the architecture
+```
+
+## Project Architecture
+
+FZX-Terminal consists of several core components that work together to provide an AI-powered terminal experience:
+
+### Core Components
+
+- **[terminal_interface.py](terminal_interface.py)** - Main CLI interface handling user commands and interactions
+- **[ai_service.py](ai_service.py)** - AI service implementation with provider integrations (Gemini, OpenRouter)
+- **[chat_manager.py](chat_manager.py)** - Basic chat history management
+- **[context_manager.py](context_manager.py)** - Context management and optimization system
+
+### How Codebase Understanding Works
+
+1. **File Access**: The AI service can read project files when referenced in queries
+2. **Context Building**: Relevant code sections are included in the AI prompt
+3. **Response Generation**: AI provides informed responses based on actual code
+
+### Current Limitations
+
+- **Conversation Memory**: Limited conversation history preservation
+- **Context Persistence**: Context may not persist across sessions
+- **Follow-up Capabilities**: Basic follow-up support, may not reference previous responses reliably
 
 ## File Structure
 
@@ -208,60 +187,43 @@ For detailed model information, see [docs/MODELS.md](docs/MODELS.md)
 FZX-Terminal/
 ├── Core Components
 │   ├── terminal_interface.py       # Main CLI interface
-│   ├── advanced_building_agent.py  # AI logic and parsing
-│   ├── enhanced_ai_provider.py     # Model management
-│   └── building_agent.py          # Project generation
+│   ├── ai_service.py              # AI service implementation
+│   ├── chat_manager.py            # Basic chat history management
+│   └── context_manager.py         # Context management system
 │
 ├── Documentation
 │   ├── docs/MODELS.md             # Model selection guide
 │   ├── docs/SECURITY.md           # Security considerations
-│   ├── docs/COSTS.md              # Cost and rate limits
-│   └── docs/KNOWN_ISSUES.md       # Common issues and solutions
+│   └── docs/COSTS.md              # Cost and rate limits
 │
-├── Examples
-│   ├── examples/react-todo/       # Complete React app
-│   ├── examples/fastapi-blog/     # FastAPI server
-│   └── examples/cli-file-manager/ # Python CLI tool
-│
-├── Templates
-│   └── templates/                 # Project templates
-│
-└── Configuration
-    └── .terminal_data/            # User data and API keys
+├── Configuration
+│   └── .terminal_data/            # User data and API keys
+│       └── config.json            # AI configuration
 ```
 
 ## Commands Reference
 
-### Building Commands
-```bash
-build describe '<description>'   # Generate from natural language
-build web <name> --framework <fw>   # Create web application
-build api <name> --framework <fw>   # Create API server
-build cli <name> --language <lang>  # Create CLI tool
-build templates                     # List available templates
-```
-
 ### AI Commands
 ```bash
-build setup-ai <provider>      # Configure AI provider
-build ai-status                # Show AI configuration
-build browse-models            # Interactive model browser
-build check-updates            # Check for new models
-```
+ai config setup              # Setup AI provider and model
+ai config test               # Test AI connection
+ai config show               # Show current configuration
+ai config add-key            # Add API key
+ai config edit-key           # Edit API key
+ai config delete-key         # Delete API key
 
-### Analysis Commands
-```bash
-build analyze                  # Analyze code quality
-build status                   # System status
-build history                  # Build history
+# AI Chat
+ai chat <message>            # Chat with AI using project context
+ai status                    # Show AI configuration status
+ai help                      # Show comprehensive help
 ```
 
 ### Utility Commands
 ```bash
-help                          # Show help information
-status                        # System status
-clear                         # Clear screen
-exit                          # Exit FZX-Terminal
+help                         # Show help information
+status                       # System status
+clear                        # Clear screen
+exit                         # Exit FZX-Terminal
 ```
 
 For complete command reference, run `help` in FZX-Terminal.
@@ -274,11 +236,11 @@ Store API keys securely:
 
 ```bash
 # Option 1: Interactive setup
-build setup-ai openrouter
+ai config setup
 
 # Option 2: Environment variables
-export OPENROUTER_API_KEY="your-key"
 export GEMINI_API_KEY="your-key"
+export OPENROUTER_API_KEY="your-key"
 ```
 
 ### Security Notes
@@ -305,7 +267,7 @@ python --version  # Should be 3.8+
 **API Issues:**
 ```bash
 # Rate limit exceeded
-build ai-status  # Check usage
+ai status  # Check usage
 # Switch to different model or wait
 
 # Model timeout
@@ -347,6 +309,3 @@ MIT License
 
 - **Issues**: [GitHub Issues](https://github.com/fraol163/FZX-Terminal-/issues)
 - **Documentation**: [docs/](docs/) directory
-- **Examples**: [examples/](examples/) directory
-
----

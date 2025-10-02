@@ -96,8 +96,18 @@ class EnhancedAIProvider:
             if self.config_file.exists():
                 with open(self.config_file, 'r', encoding='utf-8') as f:
                     data = json.load(f)
+                
+                # Convert provider string to enum
+                if 'provider' in data and isinstance(data['provider'], str):
+                    # Handle both formats: "openrouter" and "AIProvider.OPENROUTER"
+                    provider_str = data['provider']
+                    if provider_str.startswith('AIProvider.'):
+                        provider_str = provider_str.split('.')[1].lower()
+                    data['provider'] = AIProvider(provider_str)
+                
                 self.config = AIProviderConfig(**data)
-        except Exception:
+        except Exception as e:
+            print(f"Warning: Could not load AI config: {e}")
             self.config = None
     
     def save_config(self) -> None:
@@ -118,7 +128,12 @@ class EnhancedAIProvider:
                     
                 self.available_models = {}
                 for model_id, model_data in data.get('models', {}).items():
-                    model_data['provider'] = AIProvider(model_data['provider'])
+                    # Convert provider string to enum with backward compatibility
+                    if isinstance(model_data['provider'], str):
+                        provider_str = model_data['provider']
+                        if provider_str.startswith('AIProvider.'):
+                            provider_str = provider_str.split('.')[1].lower()
+                        model_data['provider'] = AIProvider(provider_str)
                     self.available_models[model_id] = AIModel(**model_data)
                     
                 self.last_model_check = datetime.fromisoformat(data.get('last_check', datetime.now().isoformat()))
@@ -161,11 +176,17 @@ class EnhancedAIProvider:
                             try:
                                 # Extract pricing information
                                 pricing = model_data.get('pricing', {})
-                                prompt_cost = float(pricing.get('prompt', '0'))
-                                completion_cost = float(pricing.get('completion', '0'))
+                                try:
+                                    prompt_cost = float(pricing.get('prompt', '0')) if pricing.get('prompt') else 0.0
+                                    completion_cost = float(pricing.get('completion', '0')) if pricing.get('completion') else 0.0
+                                except (ValueError, TypeError):
+                                    # If we can't parse the pricing, consider it free
+                                    prompt_cost = 0.0
+                                    completion_cost = 0.0
                                 
                                 # Calculate average cost per 1k tokens
-                                avg_cost = (prompt_cost + completion_cost) / 2
+                                # Consider a model free if both prompt and completion costs are 0
+                                avg_cost = (prompt_cost + completion_cost) / 2 if (prompt_cost > 0 or completion_cost > 0) else 0.0
                                 
                                 # Extract context length
                                 context_length = model_data.get('context_length', 4096)
@@ -180,9 +201,10 @@ class EnhancedAIProvider:
                                 
                                 # Determine capabilities
                                 capabilities = ['chat', 'completion']
-                                if 'vision' in model_data.get('id', '').lower() or 'gpt-4' in model_data.get('id', '').lower():
+                                model_id = model_data.get('id', '').lower()
+                                if 'vision' in model_id or 'gpt-4' in model_id or 'claude' in model_id:
                                     capabilities.append('vision')
-                                if 'code' in model_data.get('id', '').lower() or 'codellama' in model_data.get('id', '').lower():
+                                if 'code' in model_id or 'codellama' in model_id or 'deepseek' in model_id or 'codestral' in model_id:
                                     capabilities.append('code')
                                 
                                 # Create model with enhanced information

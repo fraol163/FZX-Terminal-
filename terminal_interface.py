@@ -22,16 +22,20 @@ try:
     from session_bridge import SessionBridge
     from context_manager import ContextManager, get_context_manager
     from chat_manager import get_chat_manager
-    from project_inference import ProjectInferenceEngine
     from ai_service import get_ai_manager
+    # Import our new simple AI manager
+    from simple_ai_manager import get_simple_ai_manager
+    # Import building agents
     from building_agent import get_building_agent
     from advanced_building_agent import get_advanced_building_agent
+    # Import enhanced AI provider
     from enhanced_ai_provider import get_enhanced_ai_provider
 except ImportError as e:
     print(f"Warning: Could not import workflow components: {e}")
     print("Some features may be limited.")
     ProjectInferenceEngine = None
     get_ai_manager = None
+    get_simple_ai_manager = None
     get_building_agent = None
     get_advanced_building_agent = None
     get_enhanced_ai_provider = None
@@ -230,7 +234,15 @@ class RobustTerminalInterface:
             except Exception as e:
                 self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
         
-        # Building agent integration
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
         self.building_agent = None
         self.advanced_building_agent = None
         if get_building_agent:
@@ -242,6 +254,2204 @@ class RobustTerminalInterface:
         if get_advanced_building_agent:
             try:
                 self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        # Initialize state history
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        # Initialize state history
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        # Initialize state history
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: Simple AI service initialization failed: {e}", "warning")
+        
+        # Building agent integration (to be removed)
+        self.building_agent = None
+        self.advanced_building_agent = None
+        if get_building_agent:
+            try:
+                self.building_agent = get_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Building agent initialization failed: {e}", "warning")
+        
+        if get_advanced_building_agent:
+            try:
+                self.advanced_building_agent = get_advanced_building_agent(str(self.project_root))
+            except Exception as e:
+                self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
+        
+        self.state_history = []
+        self.max_history_size = 10
+        
+        # Remembered instructions persistence
+        self.memory_dir = self.data_dir / "memory"
+        self.exports_dir = self.data_dir / "exports"
+        self.remember_file = self.memory_dir / "remembered.json"
+        
+        # Editor signaling
+        self.editor_events_file = self.exports_dir / "editor_events.jsonl"
+        self._editor_signal_version = 0
+        
+        # Minimal command registry (hook for future full refactor)
+        self.command_registry = {}
+        
+        # AI service integration
+        self.ai_manager = None
+        if get_ai_manager:
+            try:
+                self.ai_manager = get_ai_manager()
+            except Exception as e:
+                self.log_message(f"Warning: AI service initialization failed: {e}", "warning")
+        
+        # Simple AI manager integration (new)
+        self.simple_ai_manager = None
+        if get_simple_ai_manager:
+            try:
+                self.simple_ai_manager = get_simple_ai_manager()
             except Exception as e:
                 self.log_message(f"Warning: Advanced building agent initialization failed: {e}", "warning")
         
@@ -731,27 +2941,9 @@ class RobustTerminalInterface:
                 ("ai config add-key", "Add or replace API key with validation", "🔑"),
                 ("ai config edit-key", "Edit current API key with validation", "✏️"),
                 ("ai config delete-key", "Remove API key and configuration completely", "🗑️"),
-                ("ai chat <message>", "Chat with AI using project context and session history", "💬"),
+                ("ai chat <message>", "Chat with AI using project context", "💬"),
                 ("ai status", "Show detailed AI service and integration status", "📊"),
                 ("ai help", "Show comprehensive AI commands help", "❓")
-            ],
-            "🔨 Universal Building Agent": [
-                ("build web <name>", "Create web application (React, Vue, Angular)", "🌐"),
-                ("build api <name>", "Create API server (Node.js, Python, Go)", "⚡"),
-                ("build desktop <name>", "Create desktop app (Electron, Tauri)", "🖥️"),
-                ("build mobile <name>", "Create mobile app (React Native, Flutter)", "📱"),
-                ("build cli <name>", "Create CLI tool", "⌨️"),
-                ("build library <name>", "Create reusable library", "📚"),
-                ("build describe '<desc>'", "Generate project from natural language description", "🧠"),
-                ("build setup-ai <provider>", "Setup AI provider (openrouter, gemini) with model selection", "🤖"),
-                ("build ai-status", "Show AI provider configuration and statistics", "📊"),
-                ("build detect", "Detect current project type and framework", "🔍"),
-                ("build suggest", "Get intelligent build suggestions", "💡"),
-                ("build analyze", "Analyze generated code for bugs and improvements", "🔍"),
-                ("build status", "Show terminal status, resources, and build health", "📊"),
-                ("build history", "Show build history and previous projects", "📜"),
-                ("build templates", "List available project templates", "📋"),
-                ("build check-updates", "Check for AI model updates and system health", "🔄")
             ],
             "🧠 Chat & Memory": [
                 ("chat add <user|assistant|system> <text>", "Append a chat message to durable log", "➕"),
@@ -2709,7 +4901,6 @@ class RobustTerminalInterface:
                 'memory': self.handle_memory_command,
                 'clear': lambda args: self._handle_clear_command(args),
                 'ai': self.handle_ai_command,
-                'build': self.handle_build_command,
             }
         except Exception:
             # Non-fatal; fallback to legacy routing
@@ -2808,7 +4999,7 @@ class RobustTerminalInterface:
         action = args[0].lower()
         
         if action == 'setup':
-            print(f"\n{Colors.CYAN}🤖 Gemini AI Configuration Setup{Colors.RESET}")
+            print(f"\n{Colors.CYAN}🤖 AI Configuration Setup{Colors.RESET}")
             print(f"{Colors.DIM}Setting up Google Gemini API integration...{Colors.RESET}\n")
             
             # Check if already configured
@@ -2835,30 +5026,149 @@ class RobustTerminalInterface:
                     return
                 print()  # Add spacing
             
+            # Get provider preference
+            print(f"\n{Colors.CYAN}Available AI providers:{Colors.RESET}")
+            providers = [
+                ('gemini', 'Google Gemini (Default)'),
+                ('openrouter', 'OpenRouter (Multi-model)')
+            ]
+            
+            for i, (provider_id, description) in enumerate(providers, 1):
+                print(f"  {i}. {description}")
+            
+            provider_choice = input(f"\n{Colors.YELLOW}Choose provider (1-2) [default: 1]: {Colors.RESET}").strip()
+            try:
+                provider_idx = int(provider_choice) - 1 if provider_choice else 0
+                selected_provider = providers[provider_idx][0] if 0 <= provider_idx < len(providers) else providers[0][0]
+            except (ValueError, IndexError):
+                selected_provider = providers[0][0]
+            
             # Get API key
-            api_key = input(f"{Colors.YELLOW}Enter your Gemini API key: {Colors.RESET}").strip()
+            if selected_provider == 'openrouter':
+                api_key = input(f"{Colors.YELLOW}Enter your OpenRouter API key: {Colors.RESET}").strip()
+                print(f"\n{Colors.CYAN}Fetching available models from OpenRouter...{Colors.RESET}")
+                
+                # Fetch models in real-time
+                import asyncio
+                async def fetch_models():
+                    models = await self.ai_manager.fetch_openrouter_models()
+                    return models
+                
+                try:
+                    openrouter_models = asyncio.run(fetch_models())
+                    if openrouter_models and openrouter_models.get('all'):
+                        all_models = openrouter_models.get('all', [])
+                        free_models = openrouter_models.get('free', [])
+                        paid_models = openrouter_models.get('paid', [])
+                        
+                        print(f"{Colors.GREEN}✅ Found {len(all_models)} models ({len(free_models)} free, {len(paid_models)} paid){Colors.RESET}")
+                        
+                        # Ask user which category they want to see
+                        print(f"\n{Colors.CYAN}Model categories:{Colors.RESET}")
+                        print(f"  1. Free models ({len(free_models)} available)")
+                        print(f"  2. Paid models ({len(paid_models)} available)")
+                        print(f"  3. All models ({len(all_models)} available)")
+                        
+                        category_choice = input(f"\n{Colors.YELLOW}Choose category (1-3) [default: 1]: {Colors.RESET}").strip()
+                        
+                        if category_choice == '2':
+                            models_to_show = paid_models
+                            category_name = "Paid"
+                        elif category_choice == '3':
+                            models_to_show = all_models
+                            category_name = "All"
+                        else:
+                            models_to_show = free_models
+                            category_name = "Free"
+                        
+                        # Show models with pagination
+                        def show_models_page(models, page_num, page_size=20):
+                            start_idx = page_num * page_size
+                            end_idx = start_idx + page_size
+                            page_models = models[start_idx:end_idx]
+                            
+                            print(f"\n{Colors.CYAN}{category_name} models (Page {page_num + 1}/{(len(models) - 1) // page_size + 1}):{Colors.RESET}")
+                            for i, model in enumerate(page_models, start_idx + 1):
+                                model_id = model.get('id', 'unknown')
+                                description = model.get('description', model_id)
+                                pricing = model.get('pricing', {})
+                                try:
+                                    prompt_cost = float(pricing.get('prompt', 0)) if pricing.get('prompt') else 0
+                                    completion_cost = float(pricing.get('completion', 0)) if pricing.get('completion') else 0
+                                    if prompt_cost > 0 or completion_cost > 0:
+                                        price_info = f" (${pricing.get('prompt', '0')}/prompt, ${pricing.get('completion', '0')}/completion)"
+                                    else:
+                                        price_info = " (Free)"
+                                except (ValueError, TypeError):
+                                    # If we can't parse the pricing, consider it free
+                                    price_info = " (Free)"
+                                print(f"  {i}. {model_id}{price_info} - {description[:100]}{'...' if len(description) > 100 else ''}")
+                            
+                            if len(models) > end_idx:
+                                print(f"\n{Colors.DIM}Enter model number or 'n' for next page, 'p' for previous page, or 'q' to quit browsing{Colors.RESET}")
+                            else:
+                                print(f"\n{Colors.DIM}Enter model number or 'q' to quit browsing{Colors.RESET}")
+                        
+                        # Pagination loop
+                        current_page = 0
+                        page_size = 20
+                        selected_model = None
+                        
+                        while selected_model is None:
+                            show_models_page(models_to_show, current_page, page_size)
+                            
+                            user_input = input(f"\n{Colors.YELLOW}Enter choice: {Colors.RESET}").strip().lower()
+                            
+                            if user_input == 'q':
+                                selected_model = "openrouter/auto"
+                                break
+                            elif user_input == 'n' and (current_page + 1) * page_size < len(models_to_show):
+                                current_page += 1
+                            elif user_input == 'p' and current_page > 0:
+                                current_page -= 1
+                            elif user_input.isdigit():
+                                model_idx = int(user_input) - 1
+                                if 0 <= model_idx < len(models_to_show):
+                                    selected_model = models_to_show[model_idx].get('id', 'unknown')
+                                else:
+                                    print(f"{Colors.RED}Invalid model number. Please try again.{Colors.RESET}")
+                            else:
+                                print(f"{Colors.RED}Invalid input. Please try again.{Colors.RESET}")
+                        
+                        # If no model was selected, use default
+                        if selected_model is None:
+                            selected_model = "openrouter/auto"
+                    else:
+                        print(f"{Colors.YELLOW}Could not fetch models, using default{Colors.RESET}")
+                        selected_model = "openrouter/auto"
+                except Exception as e:
+                    print(f"{Colors.YELLOW}⚠ Could not fetch models: {e}{Colors.RESET}")
+                    selected_model = "openrouter/auto"
+            else:
+                api_key = input(f"{Colors.YELLOW}Enter your Gemini API key: {Colors.RESET}").strip()
+                
+                # Get model preference
+                print(f"\n{Colors.CYAN}Available models (latest versions only):{Colors.RESET}")
+                models = [
+                    ('gemini-2.0-flash-exp', 'Gemini 2.0 Flash (Latest Experimental)'),
+                    ('gemini-1.5-pro-latest', 'Gemini 1.5 Pro (Latest)'),
+                    ('gemini-1.5-flash-latest', 'Gemini 1.5 Flash (Latest)'),
+                    ('gemini-1.5-flash-8b-latest', 'Gemini 1.5 Flash 8B (Latest Fastest)')
+                ]
+                
+                for i, (model_id, description) in enumerate(models, 1):
+                    print(f"  {i}. {description}")
+                
+                model_choice = input(f"\n{Colors.YELLOW}Choose model (1-4) [default: 1]: {Colors.RESET}").strip()
+                try:
+                    model_idx = int(model_choice) - 1 if model_choice else 0
+                    selected_model = models[model_idx][0] if 0 <= model_idx < len(models) else models[0][0]
+                except (ValueError, IndexError):
+                    selected_model = models[0][0]
+            
             if not api_key:
                 print(f"{Colors.RED}API key is required{Colors.RESET}")
                 return
-            
-            # Get model preference
-            print(f"\n{Colors.CYAN}Available models (latest versions only):{Colors.RESET}")
-            models = [
-                ('gemini-2.0-flash-exp', 'Gemini 2.0 Flash (Latest Experimental)'),
-                ('gemini-1.5-pro-latest', 'Gemini 1.5 Pro (Latest)'),
-                ('gemini-1.5-flash-latest', 'Gemini 1.5 Flash (Latest)'),
-                ('gemini-1.5-flash-8b', 'Gemini 1.5 Flash 8B (Fastest)')
-            ]
-            
-            for i, (model_id, description) in enumerate(models, 1):
-                print(f"  {i}. {description}")
-            
-            model_choice = input(f"\n{Colors.YELLOW}Choose model (1-4) [default: 1]: {Colors.RESET}").strip()
-            try:
-                model_idx = int(model_choice) - 1 if model_choice else 0
-                selected_model = models[model_idx][0] if 0 <= model_idx < len(models) else models[0][0]
-            except (ValueError, IndexError):
-                selected_model = models[0][0]
             
             # Get additional settings
             max_tokens = input(f"{Colors.YELLOW}Max tokens [default: 4000]: {Colors.RESET}").strip()
@@ -2878,7 +5188,10 @@ class RobustTerminalInterface:
             
             import asyncio
             async def validate_key():
-                is_valid, message = await self.ai_manager.validate_api_key(api_key, selected_model)
+                # Determine provider for validation
+                from ai_service import AIProvider
+                provider = AIProvider.OPENROUTER if selected_provider == 'openrouter' else AIProvider.GEMINI
+                is_valid, message = await self.ai_manager.validate_api_key(api_key, selected_model, provider)
                 return is_valid, message
             
             try:
@@ -2896,8 +5209,10 @@ class RobustTerminalInterface:
                     print(f"{Colors.CYAN}Setup cancelled.{Colors.RESET}")
                     return
             
-            # Configure the AI service
-            if self.ai_manager.configure(api_key, selected_model, max_tokens, temperature):
+            # Configure the AI service with provider
+            from ai_service import AIProvider
+            provider_enum = AIProvider.OPENROUTER if selected_provider == 'openrouter' else AIProvider.GEMINI
+            if self.ai_manager.configure(api_key, selected_model, max_tokens, temperature, provider_enum):
                 print(f"\n{Colors.GREEN}✅ AI service configured successfully!{Colors.RESET}")
                 self._show_api_key_status()
                 print(f"\n{Colors.CYAN}You can now use 'ai chat <message>' to interact with AI{Colors.RESET}")
@@ -2916,6 +5231,11 @@ class RobustTerminalInterface:
                 print(f"  Context window: {config.context_window}")
                 print(f"  Context integration: {'Enabled' if config.enable_context_integration else 'Disabled'}")
                 print(f"  Streaming: {'Enabled' if config.enable_streaming else 'Disabled'}")
+                
+                # Show additional provider-specific information
+                if config.provider.value == 'openrouter':
+                    print(f"  {Colors.DIM}Note: OpenRouter provides access to 100+ models{Colors.RESET}")
+                    print(f"  {Colors.DIM}Use 'ai config setup' to change model{Colors.RESET}")
             else:
                 print(f"{Colors.YELLOW}AI service not configured. Use 'ai config setup' to configure.{Colors.RESET}")
         
@@ -2924,19 +5244,18 @@ class RobustTerminalInterface:
                 print(f"{Colors.RED}AI service not configured. Use 'ai config setup' first.{Colors.RESET}")
                 return
             
-            print(f"{Colors.CYAN}Testing AI connection...{Colors.RESET}")
+            print(f"{Colors.CYAN}🚀 Testing AI connection...{Colors.RESET}")
             
             import asyncio
             async def test_ai():
                 try:
                     response = await self.ai_manager.chat("Hello! Please respond with a brief greeting.", use_context=False)
                     if response.success:
-                        print(f"{Colors.GREEN}✅ AI test successful!{Colors.RESET}")
-                        print(f"Response: {response.content[:200]}{'...' if len(response.content) > 200 else ''}")
-                        print(f"Model: {response.model}")
-                        print(f"Response time: {response.response_time:.2f}s")
+                        # Use the cool design for displaying the response
+                        tokens = response.usage.get('totalTokenCount', 0) if response.usage else 0
+                        self._display_ai_response(response.content, response.model, response.response_time, tokens)
                     else:
-                        print(f"{Colors.RED}❌ AI test failed: {response.error}{Colors.RESET}")
+                        self._display_cool_response("❌ AI TEST FAILED", response.error)
                 except Exception as e:
                     print(f"{Colors.RED}❌ AI test error: {e}{Colors.RESET}")
             
@@ -2957,7 +5276,7 @@ class RobustTerminalInterface:
     
     def _handle_add_api_key(self) -> None:
         """Handle adding a new API key."""
-        print(f"\n{Colors.CYAN}🔑 Add Gemini API Key{Colors.RESET}")
+        print(f"\n{Colors.CYAN}🔑 Add API Key{Colors.RESET}")
         
         # Check if already configured
         if self.ai_manager.is_configured():
@@ -2970,8 +5289,29 @@ class RobustTerminalInterface:
                 print(f"{Colors.CYAN}Operation cancelled.{Colors.RESET}")
                 return
         
-        # Get new API key
-        api_key = input(f"\n{Colors.YELLOW}Enter your Gemini API key: {Colors.RESET}").strip()
+        # Get provider preference
+        print(f"\n{Colors.CYAN}Available AI providers:{Colors.RESET}")
+        providers = [
+            ('gemini', 'Google Gemini (Default)'),
+            ('openrouter', 'OpenRouter (Multi-model)')
+        ]
+        
+        for i, (provider_id, description) in enumerate(providers, 1):
+            print(f"  {i}. {description}")
+        
+        provider_choice = input(f"\n{Colors.YELLOW}Choose provider (1-2) [default: 1]: {Colors.RESET}").strip()
+        try:
+            provider_idx = int(provider_choice) - 1 if provider_choice else 0
+            selected_provider = providers[provider_idx][0] if 0 <= provider_idx < len(providers) else providers[0][0]
+        except (ValueError, IndexError):
+            selected_provider = providers[0][0]
+        
+        # Get API key based on provider
+        if selected_provider == 'openrouter':
+            api_key = input(f"{Colors.YELLOW}Enter your OpenRouter API key: {Colors.RESET}").strip()
+        else:
+            api_key = input(f"{Colors.YELLOW}Enter your Gemini API key: {Colors.RESET}").strip()
+        
         if not api_key:
             print(f"{Colors.RED}API key cannot be empty{Colors.RESET}")
             return
@@ -2981,8 +5321,16 @@ class RobustTerminalInterface:
         
         import asyncio
         async def validate_new_key():
-            model_to_test = "gemini-1.5-flash-latest" if not self.ai_manager.is_configured() else self.ai_manager.config.model.value
-            is_valid, message = await self.ai_manager.validate_api_key(api_key, model_to_test)
+            # Determine model to test
+            if self.ai_manager.is_configured():
+                model_to_test = self.ai_manager.config.model.value
+                provider = self.ai_manager.config.provider
+            else:
+                model_to_test = "gemini-1.5-flash-latest" if selected_provider != 'openrouter' else "openrouter/auto"
+                from ai_service import AIProvider
+                provider = AIProvider.OPENROUTER if selected_provider == 'openrouter' else AIProvider.GEMINI
+            
+            is_valid, message = await self.ai_manager.validate_api_key(api_key, model_to_test, provider)
             return is_valid, message
         
         try:
@@ -3001,7 +5349,7 @@ class RobustTerminalInterface:
             if confirm not in ['y', 'yes']:
                 print(f"{Colors.CYAN}Operation cancelled.{Colors.RESET}")
                 return
-        
+
         # Use existing config or create new one
         if self.ai_manager.is_configured():
             config = self.ai_manager.config
@@ -3009,34 +5357,43 @@ class RobustTerminalInterface:
                 api_key=api_key,
                 model=config.model.value,
                 max_tokens=config.max_tokens,
-                temperature=config.temperature
+                temperature=config.temperature,
+                provider=config.provider
             )
         else:
             # Create new config with latest defaults
+            from ai_service import AIProvider
+            provider_enum = AIProvider.OPENROUTER if selected_provider == 'openrouter' else AIProvider.GEMINI
+            default_model = "openrouter/auto" if selected_provider == 'openrouter' else "gemini-1.5-flash-latest"
             success = self.ai_manager.configure(
                 api_key=api_key,
-                model="gemini-1.5-flash-latest",
+                model=default_model,
                 max_tokens=4000,
-                temperature=0.7
+                temperature=0.7,
+                provider=provider_enum
             )
-        
+
         if success:
-            print(f"\n{Colors.GREEN}✅ API key added successfully!{Colors.RESET}")
+            self._display_cool_response("✅ API KEY ADDED", "API key added successfully!", {"Status": "Success"})
             self._show_api_key_status()
         else:
-            print(f"\n{Colors.RED}❌ Failed to add API key{Colors.RESET}")
+            self._display_cool_response("❌ ADD API KEY FAILED", "Failed to add API key", {"Status": "Error"})
     
     def _handle_edit_api_key(self) -> None:
         """Handle editing the current API key."""
         if not self.ai_manager.is_configured():
-            print(f"{Colors.RED}No API key configured. Use 'ai config add-key' first.{Colors.RESET}")
+            self._display_cool_response("❌ CONFIGURATION ERROR", "No API key configured. Use 'ai config add-key' first.")
             return
         
-        print(f"\n{Colors.CYAN}🔎 Edit API Key{Colors.RESET}")
+        self._display_cool_response("🔎 EDIT API KEY", "Editing current API key configuration")
         
         current_key = self.ai_manager.config.api_key
         masked_key = current_key[:8] + "*" * (len(current_key) - 12) + current_key[-4:] if len(current_key) > 12 else "*" * len(current_key)
         print(f"Current key: {masked_key}")
+        
+        # Show current provider
+        current_provider = self.ai_manager.config.provider.value
+        print(f"{Colors.YELLOW}Current provider: {current_provider}{Colors.RESET}")
         
         new_key = input(f"\n{Colors.YELLOW}Enter new API key (or press Enter to cancel): {Colors.RESET}").strip()
         if not new_key:
@@ -3048,7 +5405,7 @@ class RobustTerminalInterface:
         
         import asyncio
         async def validate_edit_key():
-            is_valid, message = await self.ai_manager.validate_api_key(new_key, self.ai_manager.config.model.value)
+            is_valid, message = await self.ai_manager.validate_api_key(new_key, self.ai_manager.config.model.value, self.ai_manager.config.provider)
             return is_valid, message
         
         try:
@@ -3067,28 +5424,29 @@ class RobustTerminalInterface:
             if confirm not in ['y', 'yes']:
                 print(f"{Colors.CYAN}Edit cancelled.{Colors.RESET}")
                 return
-        
+
         config = self.ai_manager.config
         success = self.ai_manager.configure(
             api_key=new_key,
             model=config.model.value,
             max_tokens=config.max_tokens,
-            temperature=config.temperature
+            temperature=config.temperature,
+            provider=config.provider
         )
         
         if success:
-            print(f"\n{Colors.GREEN}✅ API key updated successfully!{Colors.RESET}")
+            self._display_cool_response("✅ API KEY UPDATED", "API key updated successfully!", {"Status": "Success"})
             self._show_api_key_status()
         else:
-            print(f"\n{Colors.RED}❌ Failed to update API key{Colors.RESET}")
+            self._display_cool_response("❌ UPDATE API KEY FAILED", "Failed to update API key", {"Status": "Error"})
     
     def _handle_delete_api_key(self) -> None:
         """Handle deleting the API key."""
         if not self.ai_manager.is_configured():
-            print(f"{Colors.RED}No API key configured to delete.{Colors.RESET}")
+            self._display_cool_response("❌ CONFIGURATION ERROR", "No API key configured to delete.")
             return
         
-        print(f"\n{Colors.CYAN}🗑️ Delete API Key{Colors.RESET}")
+        self._display_cool_response("🗑️ DELETE API KEY", "Deleting current API key configuration")
         
         current_key = self.ai_manager.config.api_key
         masked_key = current_key[:8] + "*" * (len(current_key) - 12) + current_key[-4:] if len(current_key) > 12 else "*" * len(current_key)
@@ -3104,10 +5462,10 @@ class RobustTerminalInterface:
             if self.ai_manager.config_file.exists():
                 self.ai_manager.config_file.unlink()
             self.ai_manager.config = None
-            print(f"\n{Colors.GREEN}✅ API key deleted successfully!{Colors.RESET}")
-            print(f"{Colors.DIM}Use 'ai config add-key' to configure a new key.{Colors.RESET}")
+            self._display_cool_response("✅ API KEY DELETED", "API key deleted successfully!", {"Status": "Success"})
+            self._display_cool_response("ℹ️ NEXT STEPS", "Use 'ai config add-key' to configure a new key.")
         except Exception as e:
-            print(f"\n{Colors.RED}❌ Failed to delete API key: {e}{Colors.RESET}")
+            self._display_cool_response("❌ DELETE API KEY FAILED", f"Failed to delete API key: {e}", {"Status": "Error"})
     
     def _handle_change_api_key(self) -> None:
         """Handle changing to a different API key (alias for edit)."""
@@ -3127,14 +5485,94 @@ class RobustTerminalInterface:
             
             print(f"\n{Colors.CYAN}Current Configuration:{Colors.RESET}")
             print(f"  🔑 API Key: {masked_key}")
-            print(f"  🤖 Model: {config.model.value}")
+            print(f"  🤖 Model: {config.model}")
             print(f"  📊 Max Tokens: {config.max_tokens}")
             print(f"  🌡️ Temperature: {config.temperature}")
         else:
             print(f"{Colors.YELLOW}No API key configured{Colors.RESET}")
     
+    def _display_ai_response(self, response_content: str, model: str = "", response_time: float = 0.0, tokens: int = 0) -> None:
+        """Display AI response with a cool design."""
+        # Create a fancy border
+        border = "═" * 77
+        print(f"\n{Colors.CYAN}╔{border}╗{Colors.RESET}")
+        print(f"{Colors.CYAN}║{Colors.RESET} {Colors.BOLD}{Colors.GREEN}🤖 AI RESPONSE{Colors.RESET} {Colors.DIM}{' ' * 61}║{Colors.RESET}")
+        print(f"{Colors.CYAN}╠{border}╣{Colors.RESET}")
+        
+        # Display the response content with word wrapping
+        lines = response_content.split('\n')
+        for line in lines:
+            if len(line) > 75:
+                # Wrap long lines
+                words = line.split()
+                current_line = ""
+                for word in words:
+                    if len(current_line + word) <= 75:
+                        current_line += word + " "
+                    else:
+                        print(f"{Colors.CYAN}║{Colors.RESET} {current_line:<75} {Colors.CYAN}║{Colors.RESET}")
+                        current_line = word + " "
+                if current_line:
+                    print(f"{Colors.CYAN}║{Colors.RESET} {current_line:<75} {Colors.CYAN}║{Colors.RESET}")
+            else:
+                print(f"{Colors.CYAN}║{Colors.RESET} {line:<75} {Colors.CYAN}║{Colors.RESET}")
+        
+        # Display metadata if available
+        if model or response_time > 0 or tokens > 0:
+            print(f"{Colors.CYAN}╠{border}╣{Colors.RESET}")
+            metadata_parts = []
+            if model:
+                metadata_parts.append(f"Model: {model}")
+            if response_time > 0:
+                metadata_parts.append(f"Time: {response_time:.2f}s")
+            if tokens > 0:
+                metadata_parts.append(f"Tokens: {tokens}")
+            
+            metadata_str = " | ".join(metadata_parts)
+            print(f"{Colors.CYAN}║{Colors.RESET} {Colors.DIM}{metadata_str:<75} {Colors.CYAN}║{Colors.RESET}")
+        
+        print(f"{Colors.CYAN}╚{border}╝{Colors.RESET}")
+    
+    def _display_cool_response(self, title: str, response_content: str, metadata: Dict[str, Any] = None) -> None:
+        """Display any response with a cool design."""
+        # Create a fancy border
+        border = "═" * 77
+        print(f"\n{Colors.CYAN}╔{border}╗{Colors.RESET}")
+        print(f"{Colors.CYAN}║{Colors.RESET} {Colors.BOLD}{Colors.GREEN}{title}{Colors.RESET} {Colors.DIM}{' ' * (77 - len(title) - 3)}║{Colors.RESET}")
+        print(f"{Colors.CYAN}╠{border}╣{Colors.RESET}")
+        
+        # Display the response content with word wrapping
+        lines = response_content.split('\n')
+        for line in lines:
+            if len(line) > 75:
+                # Wrap long lines
+                words = line.split()
+                current_line = ""
+                for word in words:
+                    if len(current_line + word) <= 75:
+                        current_line += word + " "
+                    else:
+                        print(f"{Colors.CYAN}║{Colors.RESET} {current_line:<75} {Colors.CYAN}║{Colors.RESET}")
+                        current_line = word + " "
+                if current_line:
+                    print(f"{Colors.CYAN}║{Colors.RESET} {current_line:<75} {Colors.CYAN}║{Colors.RESET}")
+            else:
+                print(f"{Colors.CYAN}║{Colors.RESET} {line:<75} {Colors.CYAN}║{Colors.RESET}")
+        
+        # Display metadata if available
+        if metadata:
+            print(f"{Colors.CYAN}╠{border}╣{Colors.RESET}")
+            metadata_parts = []
+            for key, value in metadata.items():
+                metadata_parts.append(f"{key}: {value}")
+            
+            metadata_str = " | ".join(metadata_parts)
+            print(f"{Colors.CYAN}║{Colors.RESET} {Colors.DIM}{metadata_str:<75} {Colors.CYAN}║{Colors.RESET}")
+        
+        print(f"{Colors.CYAN}╚{border}╝{Colors.RESET}")
+    
     def _handle_ai_chat(self, args: List[str]) -> None:
-        """Handle AI chat commands."""
+        """Handle AI chat commands with codebase understanding capability."""
         if not self.ai_manager:
             print(f"{Colors.RED}AI service not available{Colors.RESET}")
             return
@@ -3148,7 +5586,7 @@ class RobustTerminalInterface:
             return
         
         message = ' '.join(args)
-        print(f"\n{Colors.CYAN}🤖 Sending message to AI...{Colors.RESET}")
+        print(f"\n{Colors.CYAN}🚀 Sending message to AI...{Colors.RESET}")
         
         import asyncio
         async def chat_with_ai():
@@ -3156,14 +5594,18 @@ class RobustTerminalInterface:
                 response = await self.ai_manager.chat(message, use_context=True)
                 
                 if response.success:
-                    print(f"\n{Colors.GREEN}🤖 AI Response:{Colors.RESET}")
-                    print(f"{response.content}")
+                    # Use the cool design for displaying the response
+                    tokens = response.usage.get('totalTokenCount', 0) if response.usage else 0
+                    self._display_ai_response(response.content, response.model, response.response_time, tokens)
                     
-                    # Show metadata if verbose
-                    if self.verbose:
-                        print(f"\n{Colors.DIM}[Model: {response.model}, Time: {response.response_time:.2f}s, Tokens: {response.usage.get('totalTokenCount', 'N/A')}]{Colors.RESET}")
+                    # Log the interaction to chat manager for context preservation
+                    if hasattr(self.ai_manager, 'service') and self.ai_manager.service:
+                        service = self.ai_manager.service
+                        if hasattr(service, 'chat_manager') and service.chat_manager:
+                            service.chat_manager.add_message("user", message)
+                            service.chat_manager.add_message("assistant", response.content)
                     
-                    # Log the interaction
+                    # Also log to terminal messages
                     self.log_message(f"AI Chat - User: {message}", "ai_user")
                     self.log_message(f"AI Chat - Assistant: {response.content[:200]}...", "ai_assistant")
                     
@@ -3231,7 +5673,7 @@ class RobustTerminalInterface:
         print(f"  ai config change-key - Change to different API key (alias for edit)")
         print(f"  ai config delete-key - Remove API key and configuration completely")
         print(f"\n{Colors.YELLOW}AI Interaction:{Colors.RESET}")
-        print(f"  ai chat <message>   - Chat with AI using project context and session history")
+        print(f"  ai chat <message>   - Chat with AI using project context")
         print(f"  ai status           - Show detailed AI service and integration status")
         print(f"  ai help             - Show this comprehensive help")
         print(f"\n{Colors.GREEN}Available Models (Latest Only):{Colors.RESET}")
@@ -3248,9 +5690,12 @@ class RobustTerminalInterface:
         print(f"\n{Colors.CYAN}Key Features:{Colors.RESET}")
         print(f"  ✨ Real-time API key validation during setup")
         print(f"  🔒 Secure API key storage with masking")
-        print(f"  🧠 Context-aware responses using project files and session history")
+        print(f"  🧠 Codebase understanding with project file analysis")
         print(f"  🔄 Seamless integration with terminal workflow")
         print(f"  🚀 Always uses latest Gemini models")
+        print(f"\n{Colors.DIM}Note: AI responses use context from your current project and session{Colors.RESET}")
+
+        print(f"  🌐 Multi-provider support (Gemini & OpenRouter)")
         print(f"\n{Colors.DIM}Note: AI responses use context from your current project and session{Colors.RESET}")
 
     def handle_build_command(self, args: List[str]) -> None:
@@ -3523,7 +5968,7 @@ class RobustTerminalInterface:
             result = asyncio.run(generate_from_desc())
             
             if result.success:
-                print(f"\n{Colors.GREEN}✅ {result.message}{Colors.RESET}")
+                self._display_cool_response("✅ PROJECT GENERATION", result.message)
                 
                 if result.files_created:
                     print(f"\n{Colors.CYAN}Files created:{Colors.RESET}")
@@ -3553,7 +5998,7 @@ class RobustTerminalInterface:
                         print(f"  {i}. {step}")
                         
             else:
-                print(f"\n{Colors.RED}❌ {result.message}{Colors.RESET}")
+                self._display_cool_response("❌ GENERATION FAILED", result.message)
                 
                 if result.errors:
                     print(f"\n{Colors.RED}Errors:{Colors.RESET}")
@@ -3561,14 +6006,14 @@ class RobustTerminalInterface:
                         print(f"  • {error}")
                         
         except Exception as e:
-            print(f"{Colors.RED}Description processing failed: {e}{Colors.RESET}")
+            self._display_cool_response("❌ PROCESSING FAILED", f"Description processing failed: {e}")
     
     def _handle_build_setup_ai(self, args: List[str]) -> None:
         """Handle AI provider setup."""
         if not args:
             print(f"{Colors.RED}Usage: build setup-ai <provider>{Colors.RESET}")
             print(f"\n{Colors.CYAN}Available providers:{Colors.RESET}")
-            print(f"  openrouter - OpenRouter (supports 100+ models)")
+            print(f"  openrouter - OpenRouter (supports 100+ models with real-time fetching)")
             print(f"  gemini     - Google Gemini (free tier available)")
             return
         
@@ -3583,30 +6028,80 @@ class RobustTerminalInterface:
             return
         
         # Get API key
-        api_key = input(f"\n{Colors.YELLOW}Enter your {provider} API key: {Colors.RESET}").strip()
+        provider_name = "OpenRouter" if provider == "openrouter" else "Google Gemini"
+        api_key = input(f"\n{Colors.YELLOW}Enter your {provider_name} API key: {Colors.RESET}").strip()
         
         if not api_key:
             print(f"{Colors.RED}API key cannot be empty{Colors.RESET}")
             return
         
-        print(f"\n{Colors.CYAN}🔄 Setting up {provider} provider...{Colors.RESET}")
+        # For OpenRouter, fetch and display real-time models
+        selected_model = None
+        if provider == "openrouter" and self.enhanced_ai_provider:
+            print(f"\n{Colors.CYAN}🔍 Fetching latest models from OpenRouter...{Colors.RESET}")
+            
+            try:
+                import asyncio
+                
+                async def fetch_and_select_model():
+                    print(f"{Colors.DIM}This may take a moment...{Colors.RESET}")
+                    await self.enhanced_ai_provider.update_models_cache(force=True)
+                    
+                    # Get free models as default selection
+                    models = self.enhanced_ai_provider.get_available_models()
+                    openrouter_models = [m for m in models if m.provider.value == "openrouter"]
+                    free_models = [m for m in openrouter_models if m.cost_per_1k_tokens == 0][:10]
+                    
+                    if free_models:
+                        print(f"\n{Colors.GREEN}🆓 Top Free OpenRouter Models:{Colors.RESET}")
+                        for i, model in enumerate(free_models[:5], 1):
+                            print(f"  {i}. {model.name} ({model.id})")
+                        
+                        model_choice = input(f"\n{Colors.YELLOW}Choose model (1-5) or enter model ID [default: 1]: {Colors.RESET}").strip()
+                        
+                        if not model_choice:
+                            selected_model = free_models[0].id
+                        elif model_choice.isdigit():
+                            idx = int(model_choice) - 1
+                            if 0 <= idx < len(free_models):
+                                selected_model = free_models[idx].id
+                            else:
+                                selected_model = free_models[0].id
+                        else:
+                            selected_model = model_choice
+                    else:
+                        print(f"{Colors.YELLOW}Could not fetch models. Using default.{Colors.RESET}")
+                        selected_model = "mistralai/mistral-7b-instruct"
+                        
+                    return selected_model
+                
+                selected_model = asyncio.run(fetch_and_select_model())
+                
+            except Exception as e:
+                print(f"{Colors.YELLOW}Could not fetch real-time models: {e}. Using default.{Colors.RESET}")
+                selected_model = "mistralai/mistral-7b-instruct"
+        else:
+            # For Gemini or if enhanced provider not available
+            selected_model = "gemini-1.5-flash-latest"
+        
+        print(f"\n{Colors.CYAN}🔄 Setting up {provider_name} provider...{Colors.RESET}")
+        print(f"  Model: {selected_model}")
         
         try:
             import asyncio
             
             async def setup_provider():
-                return await self.advanced_building_agent.setup_ai_provider(provider, api_key, interactive=True)
+                return await self.advanced_building_agent.setup_ai_provider(provider, api_key, model_id=selected_model, interactive=True)
             
             success = asyncio.run(setup_provider())
             
             if success:
-                print(f"\n{Colors.GREEN}🎉 Successfully configured {provider} provider!{Colors.RESET}")
-                print(f"{Colors.CYAN}You can now use 'build describe' for AI-powered project generation{Colors.RESET}")
+                self._display_cool_response("🎉 PROVIDER CONFIGURED", f"Successfully configured {provider_name} provider!", {"Next Step": "You can now use 'build describe' for AI-powered project generation"})
             else:
-                print(f"\n{Colors.RED}❌ Failed to configure {provider} provider{Colors.RESET}")
+                self._display_cool_response("❌ CONFIGURATION FAILED", f"Failed to configure {provider_name} provider")
                 
         except Exception as e:
-            print(f"{Colors.RED}Setup failed: {e}{Colors.RESET}")
+            self._display_cool_response("❌ SETUP FAILED", f"Setup failed: {e}")
     
     def _handle_build_ai_status(self) -> None:
         """Show AI provider status."""
@@ -3650,7 +6145,7 @@ class RobustTerminalInterface:
     def _handle_build_analyze(self, args: List[str]) -> None:
         """Analyze generated code or current project."""
         if not self.advanced_building_agent:
-            print(f"{Colors.RED}Advanced building agent not available{Colors.RESET}")
+            self._display_cool_response("❌ SERVICE UNAVAILABLE", "Advanced building agent not available")
             return
         
         print(f"\n{Colors.CYAN}🔍 Analyzing current workspace...{Colors.RESET}")
@@ -3705,12 +6200,12 @@ class RobustTerminalInterface:
                     print(f"  • {warning}")
                     
         except Exception as e:
-            print(f"{Colors.RED}Analysis failed: {e}{Colors.RESET}")
+            self._display_cool_response("❌ ANALYSIS FAILED", f"Analysis failed: {e}")
     
     def _handle_build_status(self) -> None:
         """Show comprehensive build and terminal status."""
         if not self.advanced_building_agent:
-            print(f"{Colors.RED}Advanced building agent not available{Colors.RESET}")
+            self._display_cool_response("❌ SERVICE UNAVAILABLE", "Advanced building agent not available")
             return
         
         try:
@@ -3757,7 +6252,7 @@ class RobustTerminalInterface:
             print(f"  Data Directory: {'Yes' if workspace.get('data_dir_exists') else 'No'}")
             
         except Exception as e:
-            print(f"{Colors.RED}Failed to get status: {e}{Colors.RESET}")
+            self._display_cool_response("❌ STATUS CHECK FAILED", f"Failed to get status: {e}")
     
     def _handle_build_check_updates(self) -> None:
         """Check for AI model updates and system health."""
@@ -3797,12 +6292,12 @@ class RobustTerminalInterface:
                     print(f"  • {rec}")
                     
         except Exception as e:
-            print(f"{Colors.RED}Failed to check for updates: {e}{Colors.RESET}")
+            self._display_cool_response("❌ UPDATE CHECK FAILED", f"Failed to check for updates: {e}")
     
     def _handle_build_browse_models(self) -> None:
         """Browse and explore available AI models with enhanced interface."""
         if not self.enhanced_ai_provider:
-            print(f"{Colors.RED}Enhanced AI provider not available{Colors.RESET}")
+            self._display_cool_response("❌ SERVICE UNAVAILABLE", "Enhanced AI provider not available")
             return
         
         print(f"\n{Colors.CYAN}🔍 Browsing Available AI Models...{Colors.RESET}")
@@ -3870,7 +6365,7 @@ class RobustTerminalInterface:
             asyncio.run(browse_models())
             
         except Exception as e:
-            print(f"{Colors.RED}Failed to browse models: {e}{Colors.RESET}")
+            self._display_cool_response("❌ MODEL BROWSING FAILED", f"Failed to browse models: {e}")
     
     def _handle_clear_all_command(self) -> None:
         """Comprehensive clear all command that clears everything."""

@@ -603,8 +603,17 @@ class AdvancedBuildingAgent:
                     json_str = content[json_start:json_end]
                     parsed_data = json.loads(json_str)
                     
+                    # Sanitize project name to be filesystem-friendly
+                    raw_name = parsed_data.get('project_name', project_name or 'my-project')
+                    sanitized_name = raw_name.replace(' ', '-').replace('_', '-').lower()
+                    # Remove any non-alphanumeric characters except hyphens
+                    sanitized_name = ''.join(c for c in sanitized_name if c.isalnum() or c == '-')
+                    # Ensure it's not empty
+                    if not sanitized_name:
+                        sanitized_name = 'my-project'
+                    
                     return UserRequirements(
-                        project_name=parsed_data.get('project_name', project_name or 'my-project'),
+                        project_name=sanitized_name,
                         description=description,
                         build_type=BuildType(parsed_data.get('build_type', 'web')),
                         framework=Framework(parsed_data['framework']) if parsed_data.get('framework') and parsed_data['framework'] != 'null' else None,
@@ -684,8 +693,16 @@ class AdvancedBuildingAgent:
             if any(keyword in desc_lower for keyword in keywords):
                 features.append(feature)
         
+        # Sanitize project name to be filesystem-friendly
+        sanitized_name = (project_name or 'my-project').replace(' ', '-').replace('_', '-').lower()
+        # Remove any non-alphanumeric characters except hyphens
+        sanitized_name = ''.join(c for c in sanitized_name if c.isalnum() or c == '-')
+        # Ensure it's not empty
+        if not sanitized_name:
+            sanitized_name = 'my-project'
+        
         return UserRequirements(
-            project_name=project_name or 'my-project',
+            project_name=sanitized_name,
             description=description,
             build_type=build_type,
             framework=framework,
